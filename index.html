@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pick Up Your High School - Amore</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    <!-- Firebase -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-firestore-compat.js"></script>
 </head>
@@ -13,43 +12,19 @@
     <div class="max-w-7xl mx-auto">
         <h1 class="text-3xl font-bold mb-6">Pick Up Your High School - Amore</h1>
         
+        <!-- ATM Calculator -->
         <div class="bg-white shadow-md rounded p-6 mb-6">
-            <h2 class="text-xl font-semibold mb-4">Calcola Percorso:</h2>
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <strong>Da Casa Marchetti</strong> o <strong>Da Casa Filippetti:</strong>
-                    <a href="https://giromilano.atm.it/#/home/calcolapercorso" 
-                       target="_blank" 
-                       class="ml-4 text-green-600 hover:underline">
-                        Calcola percorso ATM
-                    </a>
-                </div>
-            </div>
+            <h2 class="text-xl font-semibold mb-4">Calcola il tuo percorso:</h2>
+            <iframe
+                src="https://giromilano.atm.it/#/home/calcolapercorso"
+                class="w-full h-96 border-2 border-gray-300 rounded"
+                frameborder="0">
+            </iframe>
         </div>
 
-        <div class="bg-white shadow-md rounded p-6 overflow-x-auto">
-            <table class="w-full">
-                <thead>
-                    <tr class="bg-gray-800 text-white">
-                        <th class="px-4 py-2 text-left">ID</th>
-                        <th class="px-4 py-2 text-left">Liceo</th>
-                        <th class="px-4 py-2 text-left">Votante</th>
-                        <th class="px-4 py-2 text-left">Distanza 1</th>
-                        <th class="px-4 py-2 text-left">Distanza 2</th>
-                        <th class="px-4 py-2 text-left">Voto generale</th>
-                        <th class="px-4 py-2 text-left">Impressione qualitativa</th>
-                        <th class="px-4 py-2 text-left">Inglese</th>
-                        <th class="px-4 py-2 text-left">Scienze</th>
-                        <th class="px-4 py-2 text-left">Mat</th>
-                        <th class="px-4 py-2 text-left">Internazionale</th>
-                        <th class="px-4 py-2 text-left">Banco sudato</th>
-                        <th class="px-4 py-2 text-left">Altro</th>
-                    </tr>
-                </thead>
-                <tbody id="schoolData">
-                    <!-- Data will be populated by JavaScript -->
-                </tbody>
-            </table>
+        <!-- Schools Container -->
+        <div id="schoolsContainer">
+            <!-- Schools will be populated here -->
         </div>
 
         <button onclick="saveData()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
@@ -58,7 +33,7 @@
     </div>
 
     <script>
-        // Firebase config
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCcPL8F_FAK8FYxDH3UW6xHSmUGQAxlO_Y",
             authDomain: "scuole-milano-16a99.firebaseapp.com",
@@ -72,45 +47,17 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Initial schools data
-        const initialSchools = [
-            { 
-                id: 1, 
-                name: 'Leone XIII', 
-                address: 'Via Leone XIII, 12, 20145 Milano MI',
-                voters: ['Mamma', 'Papà', 'Amore']
-            },
-            { 
-                id: 2, 
-                name: 'Einstein', 
-                address: 'Via Einstein, 3, 20137 Milano MI',
-                voters: ['Mamma', 'Papà', 'Amore']
-            },
-            { 
-                id: 3, 
-                name: 'Vittorini', 
-                address: 'Via Donati, 5/7, 20146 Milano MI',
-                voters: ['Mamma', 'Papà', 'Amore']
-            },
-            { 
-                id: 4, 
-                name: 'Moreschi', 
-                address: 'Viale San Michele del Carso, 25, 20144 Milano MI',
-                voters: ['Mamma', 'Papà', 'Amore']
-            },
-            { 
-                id: 5, 
-                name: 'Sacro Cuore', 
-                address: 'Via Rombon, 78, 20134 Milano MI',
-                voters: ['Mamma', 'Papà', 'Amore']
-            },
-            { 
-                id: 6, 
-                name: 'Vittorio Veneto', 
-                address: 'Via De Vincenti, 7, 20148 Milano MI',
-                voters: ['Mamma', 'Papà', 'Amore']
-            }
+        // Schools data
+        const schools = [
+            { id: 1, name: 'Leone XIII', address: 'Via Leone XIII, 12, 20145 Milano MI' },
+            { id: 2, name: 'Einstein', address: 'Via Einstein, 3, 20137 Milano MI' },
+            { id: 3, name: 'Vittorini', address: 'Via Donati, 5/7, 20146 Milano MI' },
+            { id: 4, name: 'Moreschi', address: 'Via San Michele del Carso, 25, 20144 Milano MI' },
+            { id: 5, name: 'Sacro Cuore', address: 'Via Rombon, 78, 20134 Milano MI' },
+            { id: 6, name: 'Vittorio Veneto', address: 'Via De Vincenti, 7, 20148 Milano MI' }
         ];
+
+        const voters = ['Mamma', 'Papà', 'Amore'];
 
         function getVoterColor(voter) {
             switch(voter) {
@@ -122,8 +69,82 @@
             }
         }
 
-        function validateNumericInput(cell) {
-            cell.addEventListener('input', function(e) {
+        function createSchoolHTML(school) {
+            return `
+                <div class="bg-white shadow-md rounded p-6 mb-8" id="school-${school.id}">
+                    <div class="grid grid-cols-12 gap-4">
+                        <!-- School header -->
+                        <div class="col-span-12 flex items-center border-b pb-4">
+                            <span class="text-2xl font-bold">${school.id}. ${school.name}</span>
+                        </div>
+                        
+                        <!-- Maps -->
+                        <div class="col-span-3">
+                            <iframe
+                                class="w-full h-48 border border-gray-300 rounded mb-2"
+                                frameborder="0"
+                                src="https://www.google.com/maps/embed/v1/place?key=AIzaSyD-G2ym859_c3eQ62ocSYe3SPuvNb6HTf4&q=${encodeURIComponent(school.address)}">
+                            </iframe>
+                        </div>
+
+                        <!-- Votes table -->
+                        <div class="col-span-9">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="bg-gray-50">
+                                        <th class="px-4 py-2 text-left">Votante</th>
+                                        <th class="px-4 py-2 text-left">Distanza 1</th>
+                                        <th class="px-4 py-2 text-left">Distanza 2</th>
+                                        <th class="px-4 py-2 text-left">Voto generale</th>
+                                        <th class="px-4 py-2 text-left">Impressione</th>
+                                        <th class="px-4 py-2 text-left">Inglese</th>
+                                        <th class="px-4 py-2 text-left">Scienze</th>
+                                        <th class="px-4 py-2 text-left">Mat</th>
+                                        <th class="px-4 py-2 text-left">Inter.</th>
+                                        <th class="px-4 py-2 text-left">Banco</th>
+                                        <th class="px-4 py-2 text-left">Altro</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${voters.map(voter => `
+                                        <tr class="${getVoterColor(voter)}">
+                                            <td class="px-4 py-2 font-medium">${voter}</td>
+                                            <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-school="${school.id}" data-voter="${voter}" data-field="distance1"></td>
+                                            <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-school="${school.id}" data-voter="${voter}" data-field="distance2"></td>
+                                            <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-school="${school.id}" data-voter="${voter}" data-field="generalVote"></td>
+                                            <td class="px-4 py-2" contenteditable="true" data-school="${school.id}" data-voter="${voter}" data-field="impression"></td>
+                                            <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-school="${school.id}" data-voter="${voter}" data-field="english"></td>
+                                            <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-school="${school.id}" data-voter="${voter}" data-field="science"></td>
+                                            <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-school="${school.id}" data-voter="${voter}" data-field="math"></td>
+                                            <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-school="${school.id}" data-voter="${voter}" data-field="international"></td>
+                                            <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-school="${school.id}" data-voter="${voter}" data-field="desk"></td>
+                                            <td class="px-4 py-2" contenteditable="true" data-school="${school.id}" data-voter="${voter}" data-field="other"></td>
+                                        </tr>
+                                    `).join('')}
+                                    <!-- Average row -->
+                                    <tr class="${getVoterColor('Media')} border-t-2 border-gray-300">
+                                        <td class="px-4 py-2 font-medium">Media</td>
+                                        <td class="px-4 py-2" data-average="true"></td>
+                                        <td class="px-4 py-2" data-average="true"></td>
+                                        <td class="px-4 py-2" data-average="true"></td>
+                                        <td class="px-4 py-2">-</td>
+                                        <td class="px-4 py-2" data-average="true"></td>
+                                        <td class="px-4 py-2" data-average="true"></td>
+                                        <td class="px-4 py-2" data-average="true"></td>
+                                        <td class="px-4 py-2" data-average="true"></td>
+                                        <td class="px-4 py-2" data-average="true"></td>
+                                        <td class="px-4 py-2">-</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function validateNumericInput(element) {
+            element.addEventListener('input', function(e) {
                 if (this.getAttribute('data-type') === 'numeric') {
                     let value = this.textContent.trim();
                     if (value && !/^\d+$/.test(value)) {
@@ -131,162 +152,80 @@
                         this.textContent = '';
                     }
                 }
+                updateAverages(this);
             });
         }
 
         function calculateAverage(values) {
-            const validValues = values.filter(v => v !== '');
-            if (validValues.length === 0) return '';
-            const sum = validValues.reduce((a, b) => a + parseInt(b), 0);
-            return Math.round(sum / validValues.length);
+            const numbers = values.map(v => parseInt(v)).filter(n => !isNaN(n));
+            if (numbers.length === 0) return '';
+            return Math.round(numbers.reduce((a, b) => a + b) / numbers.length);
         }
 
-        function initializeTable() {
-            const tbody = document.getElementById('schoolData');
-            tbody.innerHTML = initialSchools.map(school => {
-                let rows = '';
-                
-                // Add voter rows
-                school.voters.forEach((voter, index) => {
-                    rows += `
-                        <tr class="${getVoterColor(voter)} border-t">
-                            <td class="px-4 py-2">${school.id}</td>
-                            <td class="px-4 py-2">${index === 0 ? school.name : ''}</td>
-                            <td class="px-4 py-2 font-medium">${voter}</td>
-                            <td class="px-4 py-2" contenteditable="true" data-type="numeric"></td>
-                            <td class="px-4 py-2" contenteditable="true" data-type="numeric"></td>
-                            <td class="px-4 py-2" contenteditable="true" data-type="numeric"></td>
-                            <td class="px-4 py-2" contenteditable="true"></td>
-                            <td class="px-4 py-2" contenteditable="true" data-type="numeric"></td>
-                            <td class="px-4 py-2" contenteditable="true" data-type="numeric"></td>
-                            <td class="px-4 py-2" contenteditable="true" data-type="numeric"></td>
-                            <td class="px-4 py-2" contenteditable="true" data-type="numeric"></td>
-                            <td class="px-4 py-2" contenteditable="true" data-type="numeric"></td>
-                            <td class="px-4 py-2" contenteditable="true"></td>
-                        </tr>
-                    `;
-                });
+        function updateAverages(changedElement) {
+            const schoolId = changedElement.getAttribute('data-school');
+            if (!schoolId) return;
 
-                // Add average row
-                rows += `
-                    <tr class="${getVoterColor('Media')} border-t-2 border-gray-300">
-                        <td class="px-4 py-2">${school.id}</td>
-                        <td class="px-4 py-2"></td>
-                        <td class="px-4 py-2 font-medium">Media</td>
-                        <td class="px-4 py-2" data-average="true"></td>
-                        <td class="px-4 py-2" data-average="true"></td>
-                        <td class="px-4 py-2" data-average="true"></td>
-                        <td class="px-4 py-2"></td>
-                        <td class="px-4 py-2" data-average="true"></td>
-                        <td class="px-4 py-2" data-average="true"></td>
-                        <td class="px-4 py-2" data-average="true"></td>
-                        <td class="px-4 py-2" data-average="true"></td>
-                        <td class="px-4 py-2" data-average="true"></td>
-                        <td class="px-4 py-2"></td>
-                    </tr>
-                    <tr class="h-4"></tr>
-                `;
-
-                return rows;
-            }).join('');
-
-            // Add numeric validation to editable cells
-            document.querySelectorAll('[contenteditable="true"]').forEach(validateNumericInput);
-
-            // Add input event listeners to update averages
-            document.querySelectorAll('[contenteditable="true"]').forEach(cell => {
-                cell.addEventListener('input', updateAverages);
-            });
-        }
-
-        function updateAverages() {
-            initialSchools.forEach(school => {
-                const schoolRows = Array.from(document.querySelectorAll(`tr`))
-                    .filter(row => row.querySelector('td').textContent === school.id.toString());
-                
-                const voterRows = schoolRows.slice(0, 3);
-                const averageRow = schoolRows[3];
-
-                if (averageRow) {
-                    const averageCells = averageRow.querySelectorAll('[data-average="true"]');
-                    averageCells.forEach((cell, colIndex) => {
-                        const values = voterRows.map(row => 
-                            row.querySelectorAll('td')[colIndex + 3].textContent.trim());
-                        cell.textContent = calculateAverage(values);
-                    });
-                }
+            const schoolElement = document.getElementById(`school-${schoolId}`);
+            const averageRow = schoolElement.querySelector('tr:last-child');
+            const averageCells = averageRow.querySelectorAll('[data-average]');
+            
+            const voterRows = Array.from(schoolElement.querySelectorAll('tr')).slice(1, -1);
+            averageCells.forEach((cell, index) => {
+                const values = voterRows.map(row => row.cells[index + 1].textContent.trim());
+                cell.textContent = calculateAverage(values);
             });
         }
 
         async function saveData() {
             try {
                 const batch = db.batch();
-                const rows = document.querySelectorAll('#schoolData tr');
-                
-                rows.forEach(row => {
-                    const cells = row.querySelectorAll('td');
-                    const voter = cells[2].textContent;
-                    if (voter !== 'Media') {
-                        const docRef = db.collection('votes').doc(`${cells[0].textContent}-${voter}`);
-                        batch.set(docRef, {
-                            id: cells[0].textContent,
-                            name: cells[1].textContent || initialSchools[parseInt(cells[0].textContent) - 1].name,
-                            voter: voter,
-                            distance1: cells[3].textContent,
-                            distance2: cells[4].textContent,
-                            generalVote: cells[5].textContent,
-                            impression: cells[6].textContent,
-                            english: cells[7].textContent,
-                            science: cells[8].textContent,
-                            math: cells[9].textContent,
-                            international: cells[10].textContent,
-                            desk: cells[11].textContent,
-                            other: cells[12].textContent
-                        });
+                const votes = [];
+
+                document.querySelectorAll('[data-school][data-voter]').forEach(cell => {
+                    const schoolId = cell.getAttribute('data-school');
+                    const voter = cell.getAttribute('data-voter');
+                    const field = cell.getAttribute('data-field');
+                    const value = cell.textContent.trim();
+
+                    let vote = votes.find(v => v.schoolId === schoolId && v.voter === voter);
+                    if (!vote) {
+                        vote = { schoolId, voter, docId: `${schoolId}-${voter}` };
+                        votes.push(vote);
                     }
+                    vote[field] = value;
+                });
+
+                votes.forEach(vote => {
+                    const docRef = db.collection('votes').doc(vote.docId);
+                    batch.set(docRef, vote);
                 });
 
                 await batch.commit();
                 alert('Dati salvati con successo!');
             } catch (error) {
                 console.error('Error saving data:', error);
-                alert('Errore nel salvataggio dei dati');
+                alert('Errore nel salvataggio dei dati: ' + error.message);
             }
         }
 
         async function loadDataFromFirebase() {
             try {
                 const snapshot = await db.collection('votes').get();
-                const savedData = [];
                 snapshot.forEach(doc => {
-                    savedData.push(doc.data());
-                });
-
-                if (savedData.length > 0) {
-                    const rows = document.querySelectorAll('#schoolData tr');
-                    savedData.forEach((saved) => {
-                        const row = Array.from(rows).find(row => {
-                            const cells = row.querySelectorAll('td');
-                            return cells[0].textContent === saved.id && 
-                                   cells[2].textContent === saved.voter;
-                        });
-
-                        if (row) {
-                            const cells = row.querySelectorAll('td');
-                            cells[3].textContent = saved.distance1;
-                            cells[4].textContent = saved.distance2;
-                            cells[5].textContent = saved.generalVote;
-                            cells[6].textContent = saved.impression;
-                            cells[7].textContent = saved.english;
-                            cells[8].textContent = saved.science;
-                            cells[9].textContent = saved.math;
-                            cells[10].textContent = saved.international;
-                            cells[11].textContent = saved.desk;
-                            cells[12].textContent = saved.other;
+                    const data = doc.data();
+                    Object.keys(data).forEach(field => {
+                        if (field !== 'schoolId' && field !== 'voter' && field !== 'docId') {
+                            const cell = document.querySelector(
+                                `[data-school="${data.schoolId}"][data-voter="${data.voter}"][data-field="${field}"]`
+                            );
+                            if (cell) {
+                                cell.textContent = data[field];
+                                updateAverages(cell);
+                            }
                         }
                     });
-                    updateAverages();
-                }
+                });
             } catch (error) {
                 console.error('Error loading data:', error);
             }
@@ -294,10 +233,14 @@
 
         // Initialize on page load
         window.onload = function() {
-            initializeTable();
+            const container = document.getElementById('schoolsContainer');
+            container.innerHTML = schools.map(createSchoolHTML).join('');
+            
+            document.querySelectorAll('[contenteditable="true"]').forEach(validateNumericInput);
             loadDataFromFirebase();
         };
     </script>
 </body>
 </html>
-##V_3##
+
+##V_4##
