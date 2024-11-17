@@ -41,6 +41,43 @@
                 </div>
             </div>
         </div>
+
+        <!-- Open Day Calendar -->
+        <div class="bg-white shadow-md rounded p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Open Day Calendar</h2>
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr class="bg-gray-50">
+                        <th class="border px-4 py-2 text-left">Liceo</th>
+                        <th class="border px-4 py-2 text-left">Data</th>
+                        <th class="border px-4 py-2 text-left">Orario</th>
+                        <th class="border px-4 py-2 text-left">Prenotato</th>
+                        <th class="border px-4 py-2 text-left">Link</th>
+                        <th class="border px-4 py-2 text-left">Note</th>
+                    </tr>
+                </thead>
+                <tbody id="openDayData">
+                </tbody>
+            </table>
+
+            <!-- Add Open Day Form -->
+            <div class="mt-4 p-4 border rounded bg-gray-50">
+                <h3 class="text-lg font-medium mb-3">Aggiungi Open Day</h3>
+                <div class="grid grid-cols-6 gap-4">
+                    <select id="schoolSelect" class="border rounded px-2 py-1">
+                        <option value="">Seleziona Liceo</option>
+                    </select>
+                    <input type="date" id="dateInput" class="border rounded px-2 py-1">
+                    <input type="time" id="timeInput" class="border rounded px-2 py-1">
+                    <input type="text" id="linkInput" placeholder="Link prenotazione" class="border rounded px-2 py-1">
+                    <input type="text" id="noteInput" placeholder="Note" class="border rounded px-2 py-1">
+                    <button onclick="addOpenDay()" class="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600">
+                        Aggiungi
+                    </button>
+                </div>
+            </div>
+        </div>
+       
         <!-- Schools Container -->
         <div id="schoolsContainer">
             <!-- Schools will be populated here -->
@@ -258,7 +295,121 @@
             document.querySelectorAll('[contenteditable="true"]').forEach(validateNumericInput);
             loadDataFromFirebase();
         };
-    </script>
+    <script>
+            // Aggiungi queste funzioni al tuo JavaScript esistente
+            
+            // Inizializza il select con le scuole
+            function initializeSchoolSelect() {
+                const select = document.getElementById('schoolSelect');
+                schools.forEach(school => {
+                    const option = document.createElement('option');
+                    option.value = school.id;
+                    option.textContent = school.name;
+                    select.appendChild(option);
+                });
+            }
+
+            // Aggiungi un nuovo Open Day
+            async function addOpenDay() {
+                const schoolId = document.getElementById('schoolSelect').value;
+                const date = document.getElementById('dateInput').value;
+                const time = document.getElementById('timeInput').value;
+                const link = document.getElementById('linkInput').value;
+                const note = document.getElementById('noteInput').value;
+
+                if (!schoolId || !date || !time) {
+                    alert('Per favore compila i campi obbligatori (Liceo, Data, Ora)');
+                    return;
+                }
+
+                try {
+                    const docRef = await db.collection('opendays').add({
+                        schoolId,
+                        schoolName: schools.find(s => s.id === parseInt(schoolId)).name,
+                        date,
+                        time,
+                        link,
+                        note,
+                        booked: false,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    loadOpenDays();
+                    clearOpenDayForm();
+                } catch (error) {
+                    console.error('Error adding open day:', error);
+                    alert('Errore nel salvataggio dell\'open day');
+                }
+            }
+
+            // Carica gli Open Day da Firebase
+            async function loadOpenDays() {
+                try {
+                    const snapshot = await db.collection('opendays')
+                        .orderBy('date')
+                        .get();
+                    
+                    const tbody = document.getElementById('openDayData');
+                    tbody.innerHTML = '';
+                    
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        const row = document.createElement('tr');
+                        row.className = 'hover:bg-gray-50';
+                        
+                        const date = new Date(data.date);
+                        const formattedDate = date.toLocaleDateString('it-IT');
+                        
+                        row.innerHTML = `
+                            <td class="border px-4 py-2">${data.schoolName}</td>
+                            <td class="border px-4 py-2">${formattedDate}</td>
+                            <td class="border px-4 py-2">${data.time}</td>
+                            <td class="border px-4 py-2">
+                                <input type="checkbox" 
+                                    ${data.booked ? 'checked' : ''} 
+                                    onchange="updateBookingStatus('${doc.id}', this.checked)">
+                            </td>
+                            <td class="border px-4 py-2">
+                                ${data.link ? `<a href="${data.link}" target="_blank" class="text-blue-600 hover:underline">Prenota</a>` : ''}
+                            </td>
+                            <td class="border px-4 py-2">${data.note || ''}</td>
+                        `;
+                        
+                        tbody.appendChild(row);
+                    });
+                } catch (error) {
+                    console.error('Error loading open days:', error);
+                }
+            }
+
+            // Aggiorna lo stato di prenotazione
+            async function updateBookingStatus(docId, booked) {
+                try {
+                    await db.collection('opendays').doc(docId).update({
+                        booked: booked
+                    });
+                } catch (error) {
+                    console.error('Error updating booking status:', error);
+                    alert('Errore nell\'aggiornamento dello stato di prenotazione');
+                }
+            }
+
+            // Pulisci il form
+            function clearOpenDayForm() {
+                document.getElementById('schoolSelect').value = '';
+                document.getElementById('dateInput').value = '';
+                document.getElementById('timeInput').value = '';
+                document.getElementById('linkInput').value = '';
+                document.getElementById('noteInput').value = '';
+            }
+
+            // Aggiungi queste righe alla funzione window.onload
+            window.onload = function() {
+                // ... il codice esistente ...
+                initializeSchoolSelect();
+                loadOpenDays();
+            };
+        </script>
 </body>
 </html>
 
