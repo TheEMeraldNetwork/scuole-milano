@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestione Scuole</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-7xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">Gestione Scuole Milano</h1>
+        
+        <div class="bg-white shadow-md rounded p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Indirizzi di Riferimento:</h2>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <strong>Casa Marchetti:</strong>
+                    <a href="https://www.atm.it" 
+                       target="_blank" 
+                       class="ml-4 text-green-600 hover:underline">
+                        Calcola percorso ATM
+                    </a>
+                    <iframe
+                        class="w-full h-48 mt-2 border-2 border-gray-300 rounded"
+                        frameborder="0"
+                        src="https://www.google.com/maps/embed/v1/place?key=AIzaSyD-G2ym859_c3eQ62ocSYe3SPuvNb6HTf4&q=Via+Leopoldo+Marchetti+2,20141+Milano">
+                    </iframe>
+                </div>
+                <div>
+                    <strong>Casa Filippetti:</strong>
+                    <a href="https://www.atm.it" 
+                       target="_blank" 
+                       class="ml-4 text-green-600 hover:underline">
+                        Calcola percorso ATM
+                    </a>
+                    <iframe
+                        class="w-full h-48 mt-2 border-2 border-gray-300 rounded"
+                        frameborder="0"
+                        src="https://www.google.com/maps/embed/v1/place?key=AIzaSyD-G2ym859_c3eQ62ocSYe3SPuvNb6HTf4&q=Viale+Angelo+Filippetti+3,20122+Milano">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white shadow-md rounded p-6 overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="bg-gray-50">
+                        <th class="px-4 py-2 text-left">ID</th>
+                        <th class="px-4 py-2 text-left">Liceo</th>
+                        <th class="px-4 py-2 text-left">Mappa</th>
+                        <th class="px-4 py-2 text-left">Distanza 1</th>
+                        <th class="px-4 py-2 text-left">Distanza 2</th>
+                        <th class="px-4 py-2 text-left">Voto generale</th>
+                        <th class="px-4 py-2 text-left">Impressione qualitativa</th>
+                        <th class="px-4 py-2 text-left">Inglese</th>
+                        <th class="px-4 py-2 text-left">Scienze</th>
+                        <th class="px-4 py-2 text-left">Mat</th>
+                        <th class="px-4 py-2 text-left">Internazionale</th>
+                        <th class="px-4 py-2 text-left">Banco sudato</th>
+                        <th class="px-4 py-2 text-left">Altro</th>
+                    </tr>
+                </thead>
+                <tbody id="schoolData">
+                    <!-- Data will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <button onclick="saveData()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+            Salva Dati
+        </button>
+    </div>
+
+    <script>
+        // Initial data with school addresses
+        const initialSchools = [
+            { id: 1, name: 'Leone XIII', address: 'Via Leone XIII, 12, 20145 Milano MI' },
+            { id: 2, name: 'Einstein', address: 'Via Einstein, 3, 20137 Milano MI' },
+            { id: 3, name: 'Vittorini', address: 'Via Donati, 5/7, 20146 Milano MI' },
+            { id: 4, name: 'Moreschi', address: 'Viale San Michele del Carso, 25, 20144 Milano MI' },
+            { id: 5, name: 'Sacro Cuore', address: 'Via Rombon, 78, 20134 Milano MI' }
+        ];
+
+        function initializeTable() {
+            const tbody = document.getElementById('schoolData');
+            tbody.innerHTML = initialSchools.map(school => `
+                <tr class="border-t">
+                    <td class="px-4 py-2">${school.id}</td>
+                    <td class="px-4 py-2">${school.name}</td>
+                    <td class="px-4 py-2">
+                        <iframe
+                            class="w-48 h-48 border border-gray-300 rounded"
+                            frameborder="0"
+                            src="https://www.google.com/maps/embed/v1/place?key=AIzaSyD-G2ym859_c3eQ62ocSYe3SPuvNb6HTf4&q=${encodeURIComponent(school.address)}">
+                        </iframe>
+                    </td>
+                    <td class="px-4 py-2" contenteditable="true"></td>
+                    <td class="px-4 py-2" contenteditable="true"></td>
+                    <td class="px-4 py-2" contenteditable="true"></td>
+                    <td class="px-4 py-2" contenteditable="true"></td>
+                    <td class="px-4 py-2" contenteditable="true"></td>
+                    <td class="px-4 py-2" contenteditable="true"></td>
+                    <td class="px-4 py-2" contenteditable="true"></td>
+                    <td class="px-4 py-2" contenteditable="true"></td>
+                    <td class="px-4 py-2" contenteditable="true"></td>
+                    <td class="px-4 py-2" contenteditable="true"></td>
+                </tr>
+            `).join('');
+        }
+
+        function saveData() {
+            const rows = document.querySelectorAll('#schoolData tr');
+            const data = Array.from(rows).map(row => {
+                const cells = row.querySelectorAll('td');
+                return {
+                    id: cells[0].textContent,
+                    name: cells[1].textContent,
+                    distance1: cells[3].textContent,
+                    distance2: cells[4].textContent,
+                    generalVote: cells[5].textContent,
+                    impression: cells[6].textContent,
+                    english: cells[7].textContent,
+                    science: cells[8].textContent,
+                    math: cells[9].textContent,
+                    international: cells[10].textContent,
+                    desk: cells[11].textContent,
+                    other: cells[12].textContent
+                };
+            });
+            
+            localStorage.setItem('schoolData', JSON.stringify(data));
+            alert('Dati salvati con successo!');
+        }
+
+        // Load saved data on page load
+        window.onload = function() {
+            const savedData = localStorage.getItem('schoolData');
+            if (!savedData) {
+                initializeTable();
+            } else {
+                try {
+                    const parsedData = JSON.parse(savedData);
+                    // Merge saved data with initial schools data to maintain maps
+                    initializeTable();
+                    // Update editable fields with saved data
+                    const rows = document.querySelectorAll('#schoolData tr');
+                    parsedData.forEach((saved, index) => {
+                        if (rows[index]) {
+                            const cells = rows[index].querySelectorAll('td');
+                            cells[3].textContent = saved.distance1;
+                            cells[4].textContent = saved.distance2;
+                            cells[5].textContent = saved.generalVote;
+                            cells[6].textContent = saved.impression;
+                            cells[7].textContent = saved.english;
+                            cells[8].textContent = saved.science;
+                            cells[9].textContent = saved.math;
+                            cells[10].textContent = saved.international;
+                            cells[11].textContent = saved.desk;
+                            cells[12].textContent = saved.other;
+                        }
+                    });
+                } catch (e) {
+                    console.error('Error loading saved data:', e);
+                    initializeTable();
+                }
+            }
+        };
+    </script>
+</body>
+</html>
+#prima versione#
