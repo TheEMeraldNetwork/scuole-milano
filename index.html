@@ -11,17 +11,36 @@
 <body class="bg-gray-100 p-8">
     <div class="max-w-7xl mx-auto">
         <h1 class="text-3xl font-bold mb-6">Pick Up Your High School - Amore</h1>
-        
-        <!-- ATM Calculator -->
-        <div class="bg-white shadow-md rounded p-6 mb-6">
-            <h2 class="text-xl font-semibold mb-4">Calcola il tuo percorso:</h2>
-            <iframe
-                src="https://giromilano.atm.it/#/home/calcolapercorso"
-                class="w-full h-96 border-2 border-gray-300 rounded"
-                frameborder="0">
-            </iframe>
-        </div>
 
+    <!-- ATM Calculator -->
+    <div class="bg-white shadow-md rounded p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Punti di partenza e calcolo percorso:</h2>
+            <div class="mb-4">
+                <a href="https://giromilano.atm.it/#/home/calcolapercorso" 
+                   target="_blank" 
+                   class="text-lg text-green-600 hover:underline">
+                    Calcola il tuo percorso su ATM →
+                </a>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <h3 class="font-medium mb-2">Casa Marchetti:</h3>
+                    <iframe
+                        class="w-full h-48 border-2 border-gray-300 rounded"
+                        frameborder="0"
+                        src="https://www.google.com/maps/embed/v1/place?key=AIzaSyD-G2ym859_c3eQ62ocSYe3SPuvNb6HTf4&q=Via+Leopoldo+Marchetti+2,20141+Milano">
+                    </iframe>
+                </div>
+                <div>
+                    <h3 class="font-medium mb-2">Casa Filippetti:</h3>
+                    <iframe
+                        class="w-full h-48 border-2 border-gray-300 rounded"
+                        frameborder="0"
+                        src="https://www.google.com/maps/embed/v1/place?key=AIzaSyD-G2ym859_c3eQ62ocSYe3SPuvNb6HTf4&q=Viale+Angelo+Filippetti+3,20122+Milano">
+                    </iframe>
+                </div>
+            </div>
+        </div>
         <!-- Schools Container -->
         <div id="schoolsContainer">
             <!-- Schools will be populated here -->
