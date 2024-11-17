@@ -48,6 +48,7 @@
                     <tr class="bg-gray-50">
                         <th class="px-4 py-2 text-left">ID</th>
                         <th class="px-4 py-2 text-left">Liceo</th>
+                        <th class="px-4 py-2 text-left">Votante</th>
                         <th class="px-4 py-2 text-left">Mappa</th>
                         <th class="px-4 py-2 text-left">Distanza 1</th>
                         <th class="px-4 py-2 text-left">Distanza 2</th>
@@ -75,38 +76,74 @@
     <script>
         // Initial data with school addresses
         const initialSchools = [
-            { id: 1, name: 'Leone XIII', address: 'Via Leone XIII, 12, 20145 Milano MI' },
-            { id: 2, name: 'Einstein', address: 'Via Einstein, 3, 20137 Milano MI' },
-            { id: 3, name: 'Vittorini', address: 'Via Donati, 5/7, 20146 Milano MI' },
-            { id: 4, name: 'Moreschi', address: 'Viale San Michele del Carso, 25, 20144 Milano MI' },
-            { id: 5, name: 'Sacro Cuore', address: 'Via Rombon, 78, 20134 Milano MI' }
+            { 
+                id: 1, 
+                name: 'Leone XIII', 
+                address: 'Via Leone XIII, 12, 20145 Milano MI',
+                voters: ['Mamma', 'Papà', 'Amore']
+            },
+            { 
+                id: 2, 
+                name: 'Einstein', 
+                address: 'Via Einstein, 3, 20137 Milano MI',
+                voters: ['Mamma', 'Papà', 'Amore']
+            },
+            { 
+                id: 3, 
+                name: 'Vittorini', 
+                address: 'Via Donati, 5/7, 20146 Milano MI',
+                voters: ['Mamma', 'Papà', 'Amore']
+            },
+            { 
+                id: 4, 
+                name: 'Moreschi', 
+                address: 'Viale San Michele del Carso, 25, 20144 Milano MI',
+                voters: ['Mamma', 'Papà', 'Amore']
+            },
+            { 
+                id: 5, 
+                name: 'Sacro Cuore', 
+                address: 'Via Rombon, 78, 20134 Milano MI',
+                voters: ['Mamma', 'Papà', 'Amore']
+            },
+            { 
+                id: 6, 
+                name: 'Vittorio Veneto', 
+                address: 'Via De Vincenti, 7, 20148 Milano MI',
+                voters: ['Mamma', 'Papà', 'Amore']
+            }
         ];
 
         function initializeTable() {
             const tbody = document.getElementById('schoolData');
-            tbody.innerHTML = initialSchools.map(school => `
-                <tr class="border-t">
-                    <td class="px-4 py-2">${school.id}</td>
-                    <td class="px-4 py-2">${school.name}</td>
-                    <td class="px-4 py-2">
-                        <iframe
-                            class="w-48 h-48 border border-gray-300 rounded"
-                            frameborder="0"
-                            src="https://www.google.com/maps/embed/v1/place?key=AIzaSyD-G2ym859_c3eQ62ocSYe3SPuvNb6HTf4&q=${encodeURIComponent(school.address)}">
-                        </iframe>
-                    </td>
-                    <td class="px-4 py-2" contenteditable="true"></td>
-                    <td class="px-4 py-2" contenteditable="true"></td>
-                    <td class="px-4 py-2" contenteditable="true"></td>
-                    <td class="px-4 py-2" contenteditable="true"></td>
-                    <td class="px-4 py-2" contenteditable="true"></td>
-                    <td class="px-4 py-2" contenteditable="true"></td>
-                    <td class="px-4 py-2" contenteditable="true"></td>
-                    <td class="px-4 py-2" contenteditable="true"></td>
-                    <td class="px-4 py-2" contenteditable="true"></td>
-                    <td class="px-4 py-2" contenteditable="true"></td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = initialSchools.map(school => 
+                school.voters.map(voter => `
+                    <tr class="border-t ${voter !== 'Mamma' ? 'bg-gray-50' : ''}">
+                        <td class="px-4 py-2">${school.id}</td>
+                        <td class="px-4 py-2">${school.name}</td>
+                        <td class="px-4 py-2 font-medium text-gray-600">${voter}</td>
+                        <td class="px-4 py-2">
+                            ${voter === 'Mamma' ? `
+                            <iframe
+                                class="w-48 h-48 border border-gray-300 rounded"
+                                frameborder="0"
+                                src="https://www.google.com/maps/embed/v1/place?key=AIzaSyD-G2ym859_c3eQ62ocSYe3SPuvNb6HTf4&q=${encodeURIComponent(school.address)}">
+                            </iframe>
+                            ` : ''}
+                        </td>
+                        <td class="px-4 py-2" contenteditable="true"></td>
+                        <td class="px-4 py-2" contenteditable="true"></td>
+                        <td class="px-4 py-2" contenteditable="true"></td>
+                        <td class="px-4 py-2" contenteditable="true"></td>
+                        <td class="px-4 py-2" contenteditable="true"></td>
+                        <td class="px-4 py-2" contenteditable="true"></td>
+                        <td class="px-4 py-2" contenteditable="true"></td>
+                        <td class="px-4 py-2" contenteditable="true"></td>
+                        <td class="px-4 py-2" contenteditable="true"></td>
+                        <td class="px-4 py-2" contenteditable="true"></td>
+                    </tr>
+                `).join('')
+            ).join('');
         }
 
         function saveData() {
@@ -116,16 +153,17 @@
                 return {
                     id: cells[0].textContent,
                     name: cells[1].textContent,
-                    distance1: cells[3].textContent,
-                    distance2: cells[4].textContent,
-                    generalVote: cells[5].textContent,
-                    impression: cells[6].textContent,
-                    english: cells[7].textContent,
-                    science: cells[8].textContent,
-                    math: cells[9].textContent,
-                    international: cells[10].textContent,
-                    desk: cells[11].textContent,
-                    other: cells[12].textContent
+                    voter: cells[2].textContent,
+                    distance1: cells[4].textContent,
+                    distance2: cells[5].textContent,
+                    generalVote: cells[6].textContent,
+                    impression: cells[7].textContent,
+                    english: cells[8].textContent,
+                    science: cells[9].textContent,
+                    math: cells[10].textContent,
+                    international: cells[11].textContent,
+                    desk: cells[12].textContent,
+                    other: cells[13].textContent
                 };
             });
             
@@ -141,23 +179,21 @@
             } else {
                 try {
                     const parsedData = JSON.parse(savedData);
-                    // Merge saved data with initial schools data to maintain maps
                     initializeTable();
-                    // Update editable fields with saved data
                     const rows = document.querySelectorAll('#schoolData tr');
                     parsedData.forEach((saved, index) => {
                         if (rows[index]) {
                             const cells = rows[index].querySelectorAll('td');
-                            cells[3].textContent = saved.distance1;
-                            cells[4].textContent = saved.distance2;
-                            cells[5].textContent = saved.generalVote;
-                            cells[6].textContent = saved.impression;
-                            cells[7].textContent = saved.english;
-                            cells[8].textContent = saved.science;
-                            cells[9].textContent = saved.math;
-                            cells[10].textContent = saved.international;
-                            cells[11].textContent = saved.desk;
-                            cells[12].textContent = saved.other;
+                            cells[4].textContent = saved.distance1;
+                            cells[5].textContent = saved.distance2;
+                            cells[6].textContent = saved.generalVote;
+                            cells[7].textContent = saved.impression;
+                            cells[8].textContent = saved.english;
+                            cells[9].textContent = saved.science;
+                            cells[10].textContent = saved.math;
+                            cells[11].textContent = saved.international;
+                            cells[12].textContent = saved.desk;
+                            cells[13].textContent = saved.other;
                         }
                     });
                 } catch (e) {
@@ -169,4 +205,3 @@
     </script>
 </body>
 </html>
-#prima versione#
