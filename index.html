@@ -3,17 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pick Up Your High School - Amore</title>
+    <title>School Finder! Per Amore</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-firestore-compat.js"></script>
+    <!-- Stili personalizzati -->
+    <style>
+        body {
+            background-image: url('data:image/svg+xml,%3Csvg width="52" height="26" viewBox="0 0 52 26" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23f3e8ff" fill-opacity="0.4"%3E%3Cpath d="M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z"%3E%3C/path%3E%3C/g%3E%3C/g%3E%3C/svg%3E');
+            background-color: #f8f4ff;
+        }
+        .main-container {
+            background-color: rgba(255, 255, 255, 0.97);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
-<body class="bg-gray-100 p-8">
-    <div class="max-w-7xl mx-auto">
-        <h1 class="text-3xl font-bold mb-6">Pick Up Your High School - Amore</h1>
-
-    <!-- ATM Calculator -->
-    <div class="bg-white shadow-md rounded p-6 mb-6">
+<body class="p-8">
+    <div class="max-w-7xl mx-auto main-container rounded-lg p-6">
+        <!-- Header -->
+        <h1 class="text-4xl font-bold mb-6 text-center text-purple-800">School Finder! Per Amore</h1>
+        
+        <!-- ATM Calculator -->
+        <div class="bg-white shadow-md rounded p-6 mb-6">
             <h2 class="text-xl font-semibold mb-4">Punti di partenza e calcolo percorso:</h2>
             <div class="mb-4">
                 <a href="https://giromilano.atm.it/#/home/calcolapercorso" 
@@ -77,15 +89,22 @@
                 </div>
             </div>
         </div>
-       
+
         <!-- Schools Container -->
         <div id="schoolsContainer">
             <!-- Schools will be populated here -->
         </div>
 
+        <!-- Save Button -->
         <button onclick="saveData()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
             Salva Dati
         </button>
+
+        <!-- Version Footer -->
+        <div class="mt-8 pt-4 border-t text-gray-500 text-sm text-center">
+            <p>##V_4##</p>
+            <p>17 Novembre 2024</p>
+        </div>
     </div>
 
     <script>
@@ -149,16 +168,15 @@
                                 <thead>
                                     <tr class="bg-gray-50">
                                         <th class="px-4 py-2 text-left">Votante</th>
-                                        <th class="px-4 py-2 text-left">Distanza 1</th>
-                                        <th class="px-4 py-2 text-left">Distanza 2</th>
-                                        <th class="px-4 py-2 text-left">Voto generale</th>
-                                        <th class="px-4 py-2 text-left">Impressione</th>
+                                        <th class="px-4 py-2 text-left">Dist. Mar.</th>
+                                        <th class="px-4 py-2 text-left">Dist. Fil.</th>
                                         <th class="px-4 py-2 text-left">Inglese</th>
                                         <th class="px-4 py-2 text-left">Scienze</th>
                                         <th class="px-4 py-2 text-left">Mat</th>
                                         <th class="px-4 py-2 text-left">Inter.</th>
                                         <th class="px-4 py-2 text-left">Banco</th>
-                                        <th class="px-4 py-2 text-left">Altro</th>
+                                        <th class="px-4 py-2 text-left">Voto gen.</th>
+                                        <th class="px-4 py-2 text-left">Impressione</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -167,14 +185,13 @@
                                             <td class="px-4 py-2 font-medium">${voter}</td>
                                             <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-school="${school.id}" data-voter="${voter}" data-field="distance1"></td>
                                             <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-school="${school.id}" data-voter="${voter}" data-field="distance2"></td>
-                                            <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-school="${school.id}" data-voter="${voter}" data-field="generalVote"></td>
-                                            <td class="px-4 py-2" contenteditable="true" data-school="${school.id}" data-voter="${voter}" data-field="impression"></td>
                                             <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-school="${school.id}" data-voter="${voter}" data-field="english"></td>
                                             <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-school="${school.id}" data-voter="${voter}" data-field="science"></td>
                                             <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-school="${school.id}" data-voter="${voter}" data-field="math"></td>
                                             <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-school="${school.id}" data-voter="${voter}" data-field="international"></td>
                                             <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-school="${school.id}" data-voter="${voter}" data-field="desk"></td>
-                                            <td class="px-4 py-2" contenteditable="true" data-school="${school.id}" data-voter="${voter}" data-field="other"></td>
+                                            <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-school="${school.id}" data-voter="${voter}" data-field="generalVote"></td>
+                                            <td class="px-4 py-2" contenteditable="true" data-school="${school.id}" data-voter="${voter}" data-field="impression"></td>
                                         </tr>
                                     `).join('')}
                                     <!-- Average row -->
@@ -183,7 +200,6 @@
                                         <td class="px-4 py-2" data-average="true"></td>
                                         <td class="px-4 py-2" data-average="true"></td>
                                         <td class="px-4 py-2" data-average="true"></td>
-                                        <td class="px-4 py-2">-</td>
                                         <td class="px-4 py-2" data-average="true"></td>
                                         <td class="px-4 py-2" data-average="true"></td>
                                         <td class="px-4 py-2" data-average="true"></td>
@@ -213,9 +229,10 @@
         }
 
         function calculateAverage(values) {
-            const numbers = values.map(v => parseInt(v)).filter(n => !isNaN(n));
-            if (numbers.length === 0) return '';
-            return Math.round(numbers.reduce((a, b) => a + b) / numbers.length);
+            const validValues = values.map(v => parseInt(v.trim())).filter(n => !isNaN(n));
+            if (validValues.length === 0) return '-';
+            const sum = validValues.reduce((a, b) => a + b, 0);
+            return Math.round(sum / validValues.length);
         }
 
         function updateAverages(changedElement) {
@@ -226,11 +243,130 @@
             const averageRow = schoolElement.querySelector('tr:last-child');
             const averageCells = averageRow.querySelectorAll('[data-average]');
             
-            const voterRows = Array.from(schoolElement.querySelectorAll('tr')).slice(1, -1);
+            const voterRows = Array.from(schoolElement.querySelectorAll('tr')).slice(0, voters.length);
             averageCells.forEach((cell, index) => {
-                const values = voterRows.map(row => row.cells[index + 1].textContent.trim());
+                const values = voterRows.map(row => row.cells[index + 1].textContent);
                 cell.textContent = calculateAverage(values);
             });
+        }
+
+        // Unified window.onload function
+        window.onload = function() {
+            // Initialize schools
+            const container = document.getElementById('schoolsContainer');
+            container.innerHTML = schools.map(createSchoolHTML).join('');
+            
+            // Initialize numeric validation and averages
+            document.querySelectorAll('[contenteditable="true"]').forEach(validateNumericInput);
+
+            // Initialize school select for Open Days
+            initializeSchoolSelect();
+            
+            // Load data
+            loadDataFromFirebase();
+            loadOpenDays();
+        };
+
+        // Open Days related functions
+        function initializeSchoolSelect() {
+            const select = document.getElementById('schoolSelect');
+            select.innerHTML = '<option value="">Seleziona Liceo</option>';
+            schools.forEach(school => {
+                const option = document.createElement('option');
+                option.value = school.id;
+                option.textContent = school.name;
+                select.appendChild(option);
+            });
+        }
+
+        async function addOpenDay() {
+            const schoolId = document.getElementById('schoolSelect').value;
+            const date = document.getElementById('dateInput').value;
+            const time = document.getElementById('timeInput').value;
+            const link = document.getElementById('linkInput').value;
+            const note = document.getElementById('noteInput').value;
+
+            if (!schoolId || !date || !time) {
+                alert('Per favore compila i campi obbligatori (Liceo, Data, Ora)');
+                return;
+            }
+
+            try {
+                await db.collection('opendays').add({
+                    schoolId,
+                    schoolName: schools.find(s => s.id === parseInt(schoolId)).name,
+                    date,
+                    time,
+                    link,
+                    note,
+                    booked: false,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                loadOpenDays();
+                clearOpenDayForm();
+            } catch (error) {
+                console.error('Error adding open day:', error);
+                alert('Errore nel salvataggio dell\'open day');
+            }
+        }
+
+        async function loadOpenDays() {
+            try {
+                const snapshot = await db.collection('opendays')
+                    .orderBy('date')
+                    .get();
+                
+                const tbody = document.getElementById('openDayData');
+                tbody.innerHTML = '';
+                
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-50';
+                    
+                    const date = new Date(data.date);
+                    const formattedDate = date.toLocaleDateString('it-IT');
+                    
+                    row.innerHTML = `
+                        <td class="border px-4 py-2">${data.schoolName}</td>
+                        <td class="border px-4 py-2">${formattedDate}</td>
+                        <td class="border px-4 py-2">${data.time}</td>
+                        <td class="border px-4 py-2">
+                            <input type="checkbox" 
+                                ${data.booked ? 'checked' : ''} 
+                                onchange="updateBookingStatus('${doc.id}', this.checked)">
+                        </td>
+                        <td class="border px-4 py-2">
+                            ${data.link ? `<a href="${data.link}" target="_blank" class="text-blue-600 hover:underline">Prenota</a>` : ''}
+                        </td>
+                        <td class="border px-4 py-2">${data.note || ''}</td>
+                    `;
+                    
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error loading open days:', error);
+            }
+        }
+
+        async function updateBookingStatus(docId, booked) {
+            try {
+                await db.collection('opendays').doc(docId).update({
+                    booked: booked
+                });
+            } catch (error) {
+                console.error('Error updating booking status:', error);
+                alert('Errore nell\'aggiornamento dello stato di prenotazione');
+            }
+        }
+
+        function clearOpenDayForm() {
+            document.getElementById('schoolSelect').value = '';
+            document.getElementById('dateInput').value = '';
+            document.getElementById('timeInput').value = '';
+            document.getElementById('linkInput').value = '';
+            document.getElementById('noteInput').value = '';
         }
 
         async function saveData() {
@@ -268,6 +404,8 @@
         async function loadDataFromFirebase() {
             try {
                 const snapshot = await db.collection('votes').get();
+                const promises = [];
+                
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     Object.keys(data).forEach(field => {
@@ -277,140 +415,19 @@
                             );
                             if (cell) {
                                 cell.textContent = data[field];
-                                updateAverages(cell);
+                                promises.push(updateAverages(cell));
                             }
                         }
                     });
                 });
-            } catch (error) {
+
+                await Promise.all(promises);
+            }
+
+        } catch (error) {
                 console.error('Error loading data:', error);
             }
         }
-
-        // Initialize on page load
-        window.onload = function() {
-            const container = document.getElementById('schoolsContainer');
-            container.innerHTML = schools.map(createSchoolHTML).join('');
-            
-            document.querySelectorAll('[contenteditable="true"]').forEach(validateNumericInput);
-            loadDataFromFirebase();
-        };
-    <script>
-            // Aggiungi queste funzioni al tuo JavaScript esistente
-            
-            // Inizializza il select con le scuole
-            function initializeSchoolSelect() {
-                const select = document.getElementById('schoolSelect');
-                schools.forEach(school => {
-                    const option = document.createElement('option');
-                    option.value = school.id;
-                    option.textContent = school.name;
-                    select.appendChild(option);
-                });
-            }
-
-            // Aggiungi un nuovo Open Day
-            async function addOpenDay() {
-                const schoolId = document.getElementById('schoolSelect').value;
-                const date = document.getElementById('dateInput').value;
-                const time = document.getElementById('timeInput').value;
-                const link = document.getElementById('linkInput').value;
-                const note = document.getElementById('noteInput').value;
-
-                if (!schoolId || !date || !time) {
-                    alert('Per favore compila i campi obbligatori (Liceo, Data, Ora)');
-                    return;
-                }
-
-                try {
-                    const docRef = await db.collection('opendays').add({
-                        schoolId,
-                        schoolName: schools.find(s => s.id === parseInt(schoolId)).name,
-                        date,
-                        time,
-                        link,
-                        note,
-                        booked: false,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    
-                    loadOpenDays();
-                    clearOpenDayForm();
-                } catch (error) {
-                    console.error('Error adding open day:', error);
-                    alert('Errore nel salvataggio dell\'open day');
-                }
-            }
-
-            // Carica gli Open Day da Firebase
-            async function loadOpenDays() {
-                try {
-                    const snapshot = await db.collection('opendays')
-                        .orderBy('date')
-                        .get();
-                    
-                    const tbody = document.getElementById('openDayData');
-                    tbody.innerHTML = '';
-                    
-                    snapshot.forEach(doc => {
-                        const data = doc.data();
-                        const row = document.createElement('tr');
-                        row.className = 'hover:bg-gray-50';
-                        
-                        const date = new Date(data.date);
-                        const formattedDate = date.toLocaleDateString('it-IT');
-                        
-                        row.innerHTML = `
-                            <td class="border px-4 py-2">${data.schoolName}</td>
-                            <td class="border px-4 py-2">${formattedDate}</td>
-                            <td class="border px-4 py-2">${data.time}</td>
-                            <td class="border px-4 py-2">
-                                <input type="checkbox" 
-                                    ${data.booked ? 'checked' : ''} 
-                                    onchange="updateBookingStatus('${doc.id}', this.checked)">
-                            </td>
-                            <td class="border px-4 py-2">
-                                ${data.link ? `<a href="${data.link}" target="_blank" class="text-blue-600 hover:underline">Prenota</a>` : ''}
-                            </td>
-                            <td class="border px-4 py-2">${data.note || ''}</td>
-                        `;
-                        
-                        tbody.appendChild(row);
-                    });
-                } catch (error) {
-                    console.error('Error loading open days:', error);
-                }
-            }
-
-            // Aggiorna lo stato di prenotazione
-            async function updateBookingStatus(docId, booked) {
-                try {
-                    await db.collection('opendays').doc(docId).update({
-                        booked: booked
-                    });
-                } catch (error) {
-                    console.error('Error updating booking status:', error);
-                    alert('Errore nell\'aggiornamento dello stato di prenotazione');
-                }
-            }
-
-            // Pulisci il form
-            function clearOpenDayForm() {
-                document.getElementById('schoolSelect').value = '';
-                document.getElementById('dateInput').value = '';
-                document.getElementById('timeInput').value = '';
-                document.getElementById('linkInput').value = '';
-                document.getElementById('noteInput').value = '';
-            }
-
-            // Aggiungi queste righe alla funzione window.onload
-            window.onload = function() {
-                // ... il codice esistente ...
-                initializeSchoolSelect();
-                loadOpenDays();
-            };
-        </script>
+    </script>
 </body>
 </html>
-
-##V_4##
