@@ -38,3 +38,410 @@
         }
     </style>
 </head>
+<body class="p-8">
+   <div class="max-w-7xl mx-auto main-container rounded-lg p-6">
+       <h1 class="text-4xl font-bold mb-6 text-center text-purple-800">School Finder! Per Amore</h1>
+
+       <!-- ATM Calculator -->
+       <div class="bg-white shadow-md rounded p-6 mb-6">
+           <h2 class="text-xl font-semibold mb-4">Punti di partenza e calcolo percorso:</h2>
+           <div class="mb-4">
+               <a href="https://giromilano.atm.it/#/home/calcolapercorso" 
+                  target="_blank" 
+                  class="text-lg text-green-600 hover:underline">
+                   Calcola il tuo percorso su ATM →
+               </a>
+           </div>
+           <div class="grid grid-cols-2 gap-4">
+               <div>
+                   <h3 class="font-medium mb-2">Casa Marchetti:</h3>
+                   <iframe
+                       class="w-full h-48 border-2 border-gray-300 rounded"
+                       frameborder="0"
+                       src="https://www.google.com/maps/embed/v1/place?key=AIzaSyD-G2ym859_c3eQ62ocSYe3SPuvNb6HTf4&q=Via+Leopoldo+Marchetti+2,20141+Milano">
+                   </iframe>
+               </div>
+               <div>
+                   <h3 class="font-medium mb-2">Casa Filippetti:</h3>
+                   <iframe
+                       class="w-full h-48 border-2 border-gray-300 rounded"
+                       frameborder="0"
+                       src="https://www.google.com/maps/embed/v1/place?key=AIzaSyD-G2ym859_c3eQ62ocSYe3SPuvNb6HTf4&q=Viale+Angelo+Filippetti+3,20122+Milano">
+                   </iframe>
+               </div>
+           </div>
+       </div>
+
+       <!-- School Select -->
+       <div class="bg-white shadow-md rounded p-6 mb-6">
+           <select id="schoolSelect" class="w-full p-2 border rounded">
+               <option value="">Seleziona un liceo</option>
+           </select>
+       </div>
+
+       <!-- Open Day Calendar -->
+       <div class="bg-white shadow-md rounded p-6 mb-6">
+           <h2 class="text-xl font-semibold mb-4">Open Day Calendar</h2>
+           <table class="w-full border-collapse">
+               <thead>
+                   <tr class="bg-gray-50">
+                       <th class="border px-4 py-2 text-left">Liceo</th>
+                       <th class="border px-4 py-2 text-left">Data</th>
+                       <th class="border px-4 py-2 text-left">Orario</th>
+                       <th class="border px-4 py-2 text-left">Prenotato</th>
+                       <th class="border px-4 py-2 text-left">Link</th>
+                       <th class="border px-4 py-2 text-left">Note</th>
+                       <th class="border px-4 py-2 text-left">Azioni</th>
+                   </tr>
+               </thead>
+               <tbody id="openDayData"></tbody>
+           </table>
+
+           <!-- Notes Area -->
+           <div class="mt-6">
+               <h3 class="font-medium mb-2">Note e commenti:</h3>
+               <div class="notes-area p-4 border rounded" 
+                    contenteditable="true"
+                    id="calendarNotes"></div>
+           </div>
+
+           <!-- Calendar Actions -->
+           <div class="flex justify-between mt-4">
+               <button onclick="exportCalendarToCSV()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                   Scarica Calendario CSV
+               </button>
+               <button onclick="saveCalendarNotes()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                   Salva Note
+               </button>
+           </div>
+
+           <!-- Add Open Day Form -->
+           <div class="mt-4 p-4 border rounded bg-gray-50">
+               <h3 class="text-lg font-medium mb-3">Aggiungi Open Day</h3>
+               <div class="grid grid-cols-6 gap-4">
+                   <select id="openDaySchoolSelect" class="border rounded px-2 py-1">
+                       <option value="">Seleziona Liceo</option>
+                   </select>
+                   <input type="date" id="dateInput" class="border rounded px-2 py-1">
+                   <input type="time" id="timeInput" class="border rounded px-2 py-1">
+                   <input type="text" id="linkInput" placeholder="Link prenotazione" class="border rounded px-2 py-1">
+                   <input type="text" id="noteInput" placeholder="Note" class="border rounded px-2 py-1">
+                   <button onclick="addOpenDay()" class="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600">
+                       Aggiungi
+                   </button>
+               </div>
+           </div>
+       </div>
+
+       <!-- Schools Container -->
+       <div id="schoolsContainer"></div>
+
+       <!-- Action Buttons -->
+       <div class="flex justify-between mt-4">
+           <button onclick="saveData()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+               Salva Dati
+           </button>
+           <button onclick="exportToCSV()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+               Scarica Voti CSV
+           </button>
+       </div>
+
+       <!-- Version Footer -->
+       <div class="mt-8 pt-4 border-t text-gray-500 text-sm text-center">
+           <p>##V_4##</p>
+           <p>17 Novembre 2024</p>
+       </div>
+   </div>
+   // Firebase config
+const firebaseConfig = {
+   apiKey: "AIzaSyCcPL8F_FAK8FYxDH3UW6xHSmUGQAxlO_Y",
+   authDomain: "scuole-milano-16a99.firebaseapp.com",
+   projectId: "scuole-milano-16a99",
+   storageBucket: "scuole-milano-16a99.firebasestorage.app",
+   messagingSenderId: "732123596795",
+   appId: "1:732123596795:web:92de1d0d59b61b20276d5e"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// Schools data
+const schools = [
+   { id: 1, name: 'Leone XIII', address: 'Via Leone XIII, 12, 20145 Milano MI' },
+   { id: 2, name: 'Einstein', address: 'Via Einstein, 3, 20137 Milano MI' },
+   { id: 3, name: 'Vittorini', address: 'Via Donati, 5/7, 20146 Milano MI' },
+   { id: 4, name: 'Moreschi', address: 'Via San Michele del Carso, 25, 20144 Milano MI' },
+   { id: 5, name: 'Sacro Cuore', address: 'Via Rombon, 78, 20134 Milano MI' },
+   { id: 6, name: 'Vittorio Veneto', address: 'Via De Vincenti, 7, 20148 Milano MI' }
+];
+
+const voters = ['Mamma', 'Papà', 'Amore'];
+
+// School HTML template
+function createSchoolCard(school) {
+   return `
+   <div class="bg-white shadow-md rounded p-6 mb-8" id="school-${school.id}">
+       <div class="flex items-center justify-between mb-4">
+           <h2 class="text-2xl font-bold">${school.id}. ${school.name}</h2>
+       </div>
+       
+       <!-- School Info -->
+       <div class="grid grid-cols-4 gap-4 mb-4 school-info">
+           <div class="col-span-1">
+               <span class="font-medium mr-2">Dist. Mar.:</span>
+               <input type="number" class="w-20 border rounded px-2 py-1" 
+                      data-school="${school.id}" data-field="distance_mar">
+           </div>
+           <div class="col-span-1">
+               <span class="font-medium mr-2">Dist. Fil.:</span>
+               <input type="number" class="w-20 border rounded px-2 py-1" 
+                      data-school="${school.id}" data-field="distance_fil">
+           </div>
+           <div class="col-span-1">
+               <span class="font-medium mr-2">Sabato:</span>
+               <select class="border rounded px-2 py-1" 
+                       data-school="${school.id}" data-field="saturday">
+                   <option value="">-</option>
+                   <option value="SI">SI 😢</option>
+                   <option value="NO">NO ⛷️</option>
+               </select>
+           </div>
+       </div>
+
+       <div class="grid grid-cols-12 gap-4">
+           <!-- Map -->
+           <div class="col-span-3">
+               <iframe class="w-full h-48 border rounded"
+                       frameborder="0"
+                       src="https://www.google.com/maps/embed/v1/place?key=AIzaSyD-G2ym859_c3eQ62ocSYe3SPuvNb6HTf4&q=${encodeURIComponent(school.address)}">
+               </iframe>
+           </div>
+
+           <!-- Votes Table -->
+           <div class="col-span-9">
+               <table class="w-full">
+                   <thead>
+                       <tr class="bg-gray-50">
+                           <th class="px-4 py-2 text-left">Votante</th>
+                           <th class="px-4 py-2 text-left">Inglese</th>
+                           <th class="px-4 py-2 text-left">Scienze</th>
+                           <th class="px-4 py-2 text-left">Mat</th>
+                           <th class="px-4 py-2 text-left">Inter.</th>
+                           <th class="px-4 py-2 text-left">Banco</th>
+                           <th class="px-4 py-2 text-left">Voto gen.</th>
+                           <th class="px-4 py-2 text-left">Impressione</th>
+                       </tr>
+                   </thead>
+                   <tbody>
+                       ${generateVoterRows(school.id)}
+                   </tbody>
+               </table>
+           </div>
+       </div>
+   </div>`;
+}
+
+function generateVoterRows(schoolId) {
+   return voters.map(voter => `
+       <tr class="voter-${voter.toLowerCase()}">
+           <td class="px-4 py-2 font-medium">${voter}</td>
+           ${generateVoteCells(schoolId, voter)}
+       </tr>
+   `).join('') + generateMediaRow(schoolId);
+}
+
+function generateVoteCells(schoolId, voter) {
+   const fields = ['english', 'science', 'math', 'international', 'desk', 'generalVote', 'impression'];
+   return fields.map(field => `
+       <td class="px-4 py-2" contenteditable="true" 
+           data-type="${field === 'impression' ? 'text' : 'numeric'}"
+           data-school="${schoolId}" 
+           data-voter="${voter}" 
+           data-field="${field}">
+       </td>
+   `).join('');
+}
+
+function generateMediaRow(schoolId) {
+   return `
+       <tr class="voter-media border-t-2">
+           <td class="px-4 py-2 font-medium">Media</td>
+           ${['english', 'science', 'math', 'international', 'desk', 'generalVote'].map(field => `
+               <td class="px-4 py-2" contenteditable="true" 
+                   data-type="numeric" data-field="${field}">
+               </td>
+           `).join('')}
+           <td class="px-4 py-2">-</td>
+       </tr>
+   `;
+}
+// Initialize dropdowns
+function initializeSelects() {
+   const selects = ['schoolSelect', 'openDaySchoolSelect'];
+   selects.forEach(selectId => {
+       const select = document.getElementById(selectId);
+       select.innerHTML = '<option value="">Seleziona Liceo</option>';
+       schools.forEach(school => {
+           select.innerHTML += `<option value="${school.id}">${school.name}</option>`;
+       });
+   });
+}
+
+// Save/Load Data Functions
+async function saveData() {
+   try {
+       const batch = db.batch();
+       
+       // Save school basic info
+       schools.forEach(school => {
+           const schoolElement = document.getElementById(`school-${school.id}`);
+           const schoolData = {
+               distance_mar: schoolElement.querySelector('[data-field="distance_mar"]').value,
+               distance_fil: schoolElement.querySelector('[data-field="distance_fil"]').value,
+               saturday: schoolElement.querySelector('[data-field="saturday"]').value
+           };
+           batch.set(db.collection('schools').doc(school.id.toString()), schoolData);
+       });
+
+       // Save votes including media
+       const rows = document.querySelectorAll('[data-school][data-voter]');
+       const votes = {};
+       rows.forEach(cell => {
+           const schoolId = cell.getAttribute('data-school');
+           const voter = cell.getAttribute('data-voter');
+           const field = cell.getAttribute('data-field');
+           const value = cell.textContent.trim();
+
+           const key = `${schoolId}-${voter}`;
+           votes[key] = votes[key] || { schoolId, voter };
+           votes[key][field] = value;
+       });
+
+       Object.values(votes).forEach(vote => {
+           batch.set(db.collection('votes').doc(`${vote.schoolId}-${vote.voter}`), vote);
+       });
+
+       await batch.commit();
+       alert('Dati salvati con successo!');
+   } catch (error) {
+       console.error('Error saving data:', error);
+       alert('Errore nel salvataggio dei dati: ' + error.message);
+   }
+}
+
+async function loadData() {
+   try {
+       // Load school basic info
+       const schoolsSnapshot = await db.collection('schools').get();
+       schoolsSnapshot.forEach(doc => {
+           const data = doc.data();
+           const element = document.getElementById(`school-${doc.id}`);
+           if (element) {
+               element.querySelector('[data-field="distance_mar"]').value = data.distance_mar || '';
+               element.querySelector('[data-field="distance_fil"]').value = data.distance_fil || '';
+               element.querySelector('[data-field="saturday"]').value = data.saturday || '';
+           }
+       });
+
+       // Load votes
+       const votesSnapshot = await db.collection('votes').get();
+       votesSnapshot.forEach(doc => {
+           const data = doc.data();
+           Object.entries(data).forEach(([field, value]) => {
+               if (!['schoolId', 'voter'].includes(field)) {
+                   const cell = document.querySelector(
+                       `[data-school="${data.schoolId}"][data-voter="${data.voter}"][data-field="${field}"]`
+                   );
+                   if (cell) cell.textContent = value;
+               }
+           });
+       });
+
+       // Load calendar notes
+       const notesDoc = await db.collection('settings').doc('calendar_notes').get();
+       if (notesDoc.exists) {
+           document.getElementById('calendarNotes').textContent = notesDoc.data().notes || '';
+       }
+   } catch (error) {
+       console.error('Error loading data:', error);
+   }
+}
+
+// Calendar Functions
+async function addOpenDay() {
+   const schoolId = document.getElementById('openDaySchoolSelect').value;
+   const date = document.getElementById('dateInput').value;
+   const time = document.getElementById('timeInput').value;
+   const link = document.getElementById('linkInput').value;
+   const note = document.getElementById('noteInput').value;
+
+   if (!schoolId || !date || !time) {
+       alert('Per favore compila i campi obbligatori');
+       return;
+   }
+
+   try {
+       await db.collection('opendays').add({
+           schoolId,
+           schoolName: schools.find(s => s.id === parseInt(schoolId)).name,
+           date,
+           time,
+           link,
+           note,
+           booked: false,
+           timestamp: firebase.firestore.FieldValue.serverTimestamp()
+       });
+       
+       await loadOpenDays();
+       clearOpenDayForm();
+   } catch (error) {
+       console.error('Error:', error);
+       alert('Errore nel salvataggio');
+   }
+}
+
+async function loadOpenDays() {
+   try {
+       const snapshot = await db.collection('opendays').orderBy('date').get();
+       const tbody = document.getElementById('openDayData');
+       tbody.innerHTML = '';
+       
+       snapshot.forEach(doc => {
+           const data = doc.data();
+           const row = document.createElement('tr');
+           row.className = 'hover:bg-gray-50';
+           const date = new Date(data.date);
+           
+           row.innerHTML = `
+               <td class="border px-4 py-2">${data.schoolName}</td>
+               <td class="border px-4 py-2">${date.toLocaleDateString('it-IT')}</td>
+               <td class="border px-4 py-2">${data.time}</td>
+               <td class="border px-4 py-2">
+                   <input type="checkbox" ${data.booked ? 'checked' : ''} 
+                          onchange="updateBookingStatus('${doc.id}', this.checked)">
+               </td>
+               <td class="border px-4 py-2">
+                   ${data.link ? `<a href="${data.link}" target="_blank" class="text-blue-600 hover:underline">Prenota</a>` : ''}
+               </td>
+               <td class="border px-4 py-2" contenteditable="true" 
+                   onblur="updateNote('${doc.id}', this.textContent.trim())">${data.note || ''}</td>
+               <td class="border px-4 py-2">
+                   <span class="delete-row" onclick="deleteOpenDay('${doc.id}')">🗑️</span>
+               </td>
+           `;
+           
+           tbody.appendChild(row);
+       });
+   } catch (error) {
+       console.error('Error:', error);
+   }
+}
+
+// Initialize page
+window.onload = function() {
+   initializeSelects();
+   const container = document.getElementById('schoolsContainer');
+   container.innerHTML = schools.map(createSchoolCard).join('');
+   loadData();
+   loadOpenDays();
+};
