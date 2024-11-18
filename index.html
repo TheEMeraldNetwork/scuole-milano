@@ -472,99 +472,86 @@
                 console.error('Error loading data:', error);
             }
         }
-        // Calendar Functions (unchanged)
-        async function loadOpenDays() {
-            try {
-                const snapshot = await db.collection('opendays')
-                    .orderBy('date')
-                    .get();                
-                const tbody = document.getElementById('openDayData');
-                tbody.innerHTML = '';                
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    const row = document.createElement('tr');
-                    row.className = 'hover:bg-gray-50';                    
-                    const date = new Date(data.date);
-                    const formattedDate = date.toLocaleDateString('it-IT');
-                    
-                    row.innerHTML = `
-                        <td class="border px-4 py-2">${data.schoolName}</td>
-                        <td class="border px-4 py-2">${formattedDate}</td>
-                        <td class="border px-4 py-2">${data.time}</td>
-                        <td class="border px-4 py-2">
-                            <input type="checkbox" 
-                                ${data.booked ? 'checked' : ''} 
-                                onchange="updateBookingStatus('${doc.id}', this.checked)">
-                        </td>
-                        <td class="border px-4 py-2">
-                            ${data.link ? `<a href="${data.link}" target="_blank" class="text-blue-600 hover:underline">Prenota</a>` : ''}
-                        </td>
-                        <td class="border px-4 py-2" contenteditable="true" onblur="updateNote('${doc.id}', this.textContent.trim())">${data.note || ''}</td>
-                        <td class="border px-4 py-2">
-                            <span class="delete-row" onclick="deleteOpenDay('${doc.id}')">🗑️</span>
-                        </td>
-                    `;
-                    
-                    tbody.appendChild(row);
-                });
-            } catch (error) {
-                console.error('Error loading open days:', error);
-            }
-        }
+        // Calendar Functions (unchanged)    
+    async function loadOpenDays() {
+   try {
+       const snapshot = await db.collection('opendays')
+           .orderBy('date')
+           .get();
+       
+       const tbody = document.getElementById('openDayData');
+       tbody.innerHTML = '';
+       
+       snapshot.forEach(doc => {
+           const data = doc.data();
+           const row = document.createElement('tr');
+           row.className = 'hover:bg-gray-50';
+           
+           const date = new Date(data.date);
+           const formattedDate = date.toLocaleDateString('it-IT');
+           
+           row.innerHTML = `
+               <td class="border px-4 py-2">${data.schoolName}</td>
+               <td class="border px-4 py-2">${formattedDate}</td>
+               <td class="border px-4 py-2">${data.time}</td>
+               <td class="border px-4 py-2">
+                   <input type="checkbox" 
+                       ${data.booked ? 'checked' : ''} 
+                       onchange="updateBookingStatus('${doc.id}', this.checked)">
+               </td>
+               <td class="border px-4 py-2">
+                   ${data.link ? `<a href="${data.link}" target="_blank" class="text-blue-600 hover:underline">Prenota</a>` : ''}
+               </td>
+               <td class="border px-4 py-2" contenteditable="true" onblur="updateNote('${doc.id}', this.textContent.trim())">${data.note || ''}</td>
+               <td class="border px-4 py-2">
+                   <span class="delete-row cursor-pointer text-red-500 hover:text-red-700" onclick="deleteOpenDay('${doc.id}')">🗑️</span>
+               </td>
+           `;
+           
+           tbody.appendChild(row);
+       });
 
-        async function addOpenDay() {
-            const schoolId = document.getElementById('schoolSelect').value;
-            const date = document.getElementById('dateInput').value;
-            const time = document.getElementById('timeInput').value;
-            const link = document.getElementById('linkInput').value;
-            const note = document.getElementById('noteInput').value;
+       // Load calendar notes
+       const notesDoc = await db.collection('settings').doc('calendar_notes').get();
+       if (notesDoc.exists) {
+           document.getElementById('calendarNotes').textContent = notesDoc.data().notes || '';
+       }
+   } catch (error) {
+       console.error('Error loading open days:', error);
+   }
+}
 
-            if (!schoolId || !date || !time) {
-                alert('Per favore compila i campi obbligatori (Liceo, Data, Ora)');
-                return;
-            }
+async function deleteOpenDay(docId) {
+   if (confirm('Sei sicuro di voler eliminare questo Open Day?')) {
+       try {
+           await db.collection('opendays').doc(docId).delete();
+           loadOpenDays();
+       } catch (error) {
+           console.error('Error deleting open day:', error);
+           alert('Errore nella cancellazione dell\'open day');
+       }
+   }
+}
 
-            try {
-                await db.collection('opendays').add({
-                    schoolId,
-                    schoolName: schools.find(s => s.id === parseInt(schoolId)).name,
-                    date,
-                    time,
-                    link,
-                    note,
-                    booked: false,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                
-                loadOpenDays();
-                clearOpenDayForm();
-            } catch (error) {
-                console.error('Error adding open day:', error);
-                alert('Errore nel salvataggio dell\'open day');
-            }
-        }
+async function updateNote(docId, note) {
+   try {
+       await db.collection('opendays').doc(docId).update({ note });
+   } catch (error) {
+       console.error('Error updating note:', error);
+   }
+}
 
-        async function deleteOpenDay(docId) {
-            if (confirm('Sei sicuro di voler eliminare questo Open Day?')) {
-                try {
-                    await db.collection('opendays').doc(docId).delete();
-                    loadOpenDays();
-                } catch (error) {
-                    console.error('Error deleting open day:', error);
-                    alert('Errore nella cancellazione dell\'open day');
-                }
-            }
-        }
-
-        async function updateNote(docId, note) {
-            try {
-                await db.collection('opendays').doc(docId).update({ note });
-            } catch (error) {
-                console.error('Error updating note:', error);
-            }
-        }
-
-        async function updateBookingStatus(docId, booked) {
+async function saveCalendarNotes() {
+   try {
+       const notes = document.getElementById('calendarNotes').textContent;
+       await db.collection('settings').doc('calendar_notes').set({ notes });
+       alert('Note salvate con successo!');
+   } catch (error) {
+       console.error('Error saving calendar notes:', error);
+       alert('Errore nel salvataggio delle note');
+   }
+}  
+         async function updateBookingStatus(docId, booked) {
             try {
                 await db.collection('opendays').doc(docId).update({ booked });
             } catch (error) {
