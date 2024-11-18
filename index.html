@@ -208,7 +208,13 @@
                                             <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-school="${school.id}" data-voter="${voter}" data-field="math"></td>
                                             <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-school="${school.id}" data-voter="${voter}" data-field="international"></td>
                                             <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-school="${school.id}" data-voter="${voter}" data-field="desk"></td>
-                                            <td class="px-4 py-2" contenteditable="true" data-school="${school.id}" data-voter="${voter}" data-field="saturday" data-type="saturday"></td>
+                                            <td class="px-4 py-2">
+                                                <select class="w-full border-0 bg-transparent" data-school="${school.id}" data-voter="${voter}" data-field="saturday">
+                                                    <option value="">-</option>
+                                                    <option value="SI">SI 😢</option>
+                                                    <option value="NO">NO ⛷️</option>
+                                                </select>
+                                            </td>
                                             <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-school="${school.id}" data-voter="${voter}" data-field="generalVote"></td>
                                             <td class="px-4 py-2" contenteditable="true" data-school="${school.id}" data-voter="${voter}" data-field="impression"></td>
                                         </tr>
