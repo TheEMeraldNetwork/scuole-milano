@@ -81,7 +81,6 @@
     </div>
 </body>
 </html>
-
 <!-- ATM Calculator -->
         <div class="bg-white shadow-md rounded p-6 mb-6">
             <h2 class="text-xl font-semibold mb-4">Punti di partenza e calcolo percorso:</h2>
@@ -225,7 +224,6 @@
                 Scarica Voti CSV
             </button>
         </div>
-
         <script>
         // Firebase configuration
         const firebaseConfig = {
@@ -403,8 +401,7 @@
                 document.body.removeChild(link);
             }
         }
-
-            // Input validation
+        // Input validation
         function validateNumericInput(element) {
             if (element.hasAttribute('data-type') && element.getAttribute('data-type') === 'numeric') {
                 element.addEventListener('input', function(e) {
