@@ -458,7 +458,9 @@
                     const schoolId = cell.getAttribute('data-school');
                     const voter = cell.getAttribute('data-voter');
                     const field = cell.getAttribute('data-field');
-                    const value = cell.textContent.trim();
+                    const value = field === 'saturday' ? 
+                    cell.querySelector('select').value : 
+                    cell.textContent.trim();
 
                     let vote = votes.find(v => v.schoolId === schoolId && v.voter === voter);
                     if (!vote) {
