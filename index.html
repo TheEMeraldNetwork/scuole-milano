@@ -449,39 +449,45 @@
         }
 
         // Save/Load Data Functions
-        async function saveData() {
-            try {
-                const batch = db.batch();
-                const votes = [];
+async function saveData() {
+    try {
+        const batch = db.batch();
+        const votes = [];
 
-                document.querySelectorAll('[data-school][data-voter]').forEach(cell => {
-                    const schoolId = cell.getAttribute('data-school');
-                    const voter = cell.getAttribute('data-voter');
-                    const field = cell.getAttribute('data-field');
-                    const value = field === 'saturday' ? 
-                    cell.querySelector('select').value : 
-                    cell.textContent.trim();
+        document.querySelectorAll('[data-school][data-voter]').forEach(cell => {
+            const schoolId = cell.getAttribute('data-school');
+            const voter = cell.getAttribute('data-voter');
+            const field = cell.getAttribute('data-field');
+            let value;
 
-                    let vote = votes.find(v => v.schoolId === schoolId && v.voter === voter);
-                    if (!vote) {
-                        vote = { schoolId, voter, docId: `${schoolId}-${voter}` };
-                        votes.push(vote);
-                    }
-                    vote[field] = value;
-                });
-
-                votes.forEach(vote => {
-                    const docRef = db.collection('votes').doc(vote.docId);
-                    batch.set(docRef, vote);
-                });
-
-                await batch.commit();
-                alert('Dati salvati con successo!');
-            } catch (error) {
-                console.error('Error saving data:', error);
-                alert('Errore nel salvataggio dei dati: ' + error.message);
+            // Gestione speciale per il campo sabato
+            if (field === 'saturday') {
+                const select = cell.querySelector('select');
+                value = select ? select.value : '';
+            } else {
+                value = cell.textContent.trim();
             }
-        }
+
+            let vote = votes.find(v => v.schoolId === schoolId && v.voter === voter);
+            if (!vote) {
+                vote = { schoolId, voter, docId: `${schoolId}-${voter}` };
+                votes.push(vote);
+            }
+            vote[field] = value;
+        });
+
+        votes.forEach(vote => {
+            const docRef = db.collection('votes').doc(vote.docId);
+            batch.set(docRef, vote);
+        });
+
+        await batch.commit();
+        alert('Dati salvati con successo!');
+    } catch (error) {
+        console.error('Error saving data:', error);
+        alert('Errore nel salvataggio dei dati: ' + error.message);
+    }
+}
 
         async function loadDataFromFirebase() {
             try {
