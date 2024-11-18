@@ -69,10 +69,7 @@
 </head>
 <body class="p-8">
     <div class="max-w-7xl mx-auto main-container rounded-lg p-6">
-        <h1 class="text-4xl font-bold mb-6 text-center text-purple-800">School Finder! Per Amore</h1>
-
-        <!-- Il resto del contenuto verrà qui -->
-        
+        <h1 class="text-4xl font-bold mb-6 text-center text-purple-800">School Finder! Per Amore</h1>        
         <!-- Version Footer -->
         <div class="mt-8 pt-4 border-t text-gray-500 text-sm text-center">
             <p>##V_4##</p>
@@ -110,7 +107,6 @@
                 </div>
             </div>
         </div>
-
         <!-- Open Day Calendar (invariato) -->
         <div class="bg-white shadow-md rounded p-6 mb-6">
             <h2 class="text-xl font-semibold mb-4">Open Day Calendar</h2>
@@ -129,13 +125,11 @@
                 <tbody id="openDayData">
                 </tbody>
             </table>
-
             <div class="flex justify-between mt-4">
                 <button onclick="exportCalendarToCSV()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
                     Scarica Calendario CSV
                 </button>
             </div>
-
             <!-- Add Open Day Form -->
             <div class="mt-4 p-4 border rounded bg-gray-50">
                 <h3 class="text-lg font-medium mb-3">Aggiungi Open Day</h3>
@@ -153,7 +147,6 @@
                 </div>
             </div>
         </div>
-
         <!-- Schools Container NEW STRUCTURE -->
         <div id="schoolsContainer">
             <!-- Template for each school -->
@@ -182,7 +175,6 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Map and Votes Grid -->
                 <div class="grid grid-cols-12 gap-4">
                     <div class="col-span-3">
@@ -191,7 +183,6 @@
                                 src="https://www.google.com/maps/embed/v1/place?key=AIzaSyD-G2ym859_c3eQ62ocSYe3SPuvNb6HTf4&q=Leone+XIII+Milano">
                         </iframe>
                     </div>
-
                     <div class="col-span-9">
                         <table class="w-full votes-table">
                             <thead>
@@ -214,7 +205,6 @@
                 </div>
             </div>
         </div>
-
         <!-- Action Buttons -->
         <div class="flex justify-between mt-4">
             <button onclick="saveData()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
@@ -238,7 +228,6 @@
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-
         // Schools data
         const schools = [
             { id: 1, name: 'Leone XIII', address: 'Via Leone XIII, 12, 20145 Milano MI' },
@@ -255,7 +244,6 @@
         function getVoterColor(voter) {
             return `voter-${voter.toLowerCase()}`;
         }
-
         // HTML Generation
         function createSchoolHTML(school) {
             return `
@@ -287,7 +275,6 @@
                             </div>
                         </div>
                     </div>
-
                     <!-- Map and Votes Grid -->
                     <div class="grid grid-cols-12 gap-4">
                         <div class="col-span-3">
@@ -296,7 +283,6 @@
                                     src="https://www.google.com/maps/embed/v1/place?key=AIzaSyD-G2ym859_c3eQ62ocSYe3SPuvNb6HTf4&q=${encodeURIComponent(school.address)}">
                             </iframe>
                         </div>
-
                         <div class="col-span-9">
                             <table class="w-full votes-table">
                                 <thead>
@@ -349,11 +335,9 @@
                 </div>
             `;
         }
-
         // Export functions
         function exportToCSV() {
-            let csvContent = 'Liceo,Dist. Mar.,Dist. Fil.,Sabato,Votante,Inglese,Scienze,Mat,Inter.,Banco,Voto gen.,Impressione\n';
-            
+            let csvContent = 'Liceo,Dist. Mar.,Dist. Fil.,Sabato,Votante,Inglese,Scienze,Mat,Inter.,Banco,Voto gen.,Impressione\n';            
             schools.forEach(school => {
                 const schoolElement = document.getElementById(`school-${school.id}`);
                 const schoolInfo = {
@@ -387,7 +371,6 @@
 
             downloadCSV(csvContent, 'valutazioni_scuole.csv');
         }
-
         function downloadCSV(content, fileName) {
             const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
@@ -413,7 +396,6 @@
                 });
             }
         }
-
         // Save/Load Data Functions
         async function saveData() {
             try {
@@ -430,7 +412,6 @@
                     const schoolDocRef = db.collection('schools').doc(school.id.toString());
                     batch.set(schoolDocRef, schoolData);
                 });
-
                 // Save votes
                 const votes = [];
                 document.querySelectorAll('[data-school][data-voter]').forEach(cell => {
@@ -438,7 +419,6 @@
                     const voter = cell.getAttribute('data-voter');
                     const field = cell.getAttribute('data-field');
                     const value = cell.textContent.trim();
-
                     let vote = votes.find(v => v.schoolId === schoolId && v.voter === voter);
                     if (!vote) {
                         vote = { schoolId, voter, docId: `${schoolId}-${voter}` };
@@ -446,12 +426,10 @@
                     }
                     vote[field] = value;
                 });
-
                 votes.forEach(vote => {
                     const docRef = db.collection('votes').doc(vote.docId);
                     batch.set(docRef, vote);
                 });
-
                 await batch.commit();
                 alert('Dati salvati con successo!');
             } catch (error) {
@@ -459,7 +437,6 @@
                 alert('Errore nel salvataggio dei dati: ' + error.message);
             }
         }
-
         async function loadDataFromFirebase() {
             try {
                 // Load school info
@@ -473,7 +450,6 @@
                         schoolElement.querySelector('[data-field="saturday"]').value = data.saturday || '';
                     }
                 });
-
                 // Load votes
                 const votesSnapshot = await db.collection('votes').get();
                 votesSnapshot.forEach(doc => {
@@ -493,22 +469,18 @@
                 console.error('Error loading data:', error);
             }
         }
-
         // Calendar Functions (unchanged)
         async function loadOpenDays() {
             try {
                 const snapshot = await db.collection('opendays')
                     .orderBy('date')
-                    .get();
-                
+                    .get();                
                 const tbody = document.getElementById('openDayData');
-                tbody.innerHTML = '';
-                
+                tbody.innerHTML = '';                
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     const row = document.createElement('tr');
-                    row.className = 'hover:bg-gray-50';
-                    
+                    row.className = 'hover:bg-gray-50';                    
                     const date = new Date(data.date);
                     const formattedDate = date.toLocaleDateString('it-IT');
                     
@@ -605,7 +577,6 @@
             document.getElementById('linkInput').value = '';
             document.getElementById('noteInput').value = '';
         }
-
         // Initialize on page load
         window.onload = function() {
             // Initialize schools
@@ -622,6 +593,6 @@
             loadDataFromFirebase();
             loadOpenDays();
         };
-    </script>
+</script>
 </body>
 </html>
