@@ -493,9 +493,14 @@
                                 `[data-school="${data.schoolId}"][data-voter="${data.voter}"][data-field="${field}"]`
                             );
                             if (cell) {
-                                cell.textContent = data[field];
+                                if (field === 'saturday') {
+                                      // Se è un select per il sabato
+                                      cell.querySelector('select').value = data[field] || '';
+                               } else {
+                                    // Per tutti gli altri campi
+                                    cell.textContent = data[field];
                             }
-                        }
+                    }
                     });
                 });
             } catch (error) {
