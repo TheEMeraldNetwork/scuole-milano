@@ -7,7 +7,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-firestore-compat.js"></script>
-    <!-- Stili personalizzati -->
     <style>
         body {
             background-image: url('data:image/svg+xml,%3Csvg width="52" height="26" viewBox="0 0 52 26" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23f3e8ff" fill-opacity="0.4"%3E%3Cpath d="M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z"%3E%3C/path%3E%3C/g%3E%3C/g%3E%3C/svg%3E');
@@ -16,6 +15,14 @@
         .main-container {
             background-color: rgba(255, 255, 255, 0.97);
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        .delete-row {
+            cursor: pointer;
+            color: #ef4444;
+            transition: color 0.2s;
+        }
+        .delete-row:hover {
+            color: #dc2626;
         }
     </style>
 </head>
@@ -66,11 +73,18 @@
                         <th class="border px-4 py-2 text-left">Prenotato</th>
                         <th class="border px-4 py-2 text-left">Link</th>
                         <th class="border px-4 py-2 text-left">Note</th>
+                        <th class="border px-4 py-2 text-left">Azioni</th>
                     </tr>
                 </thead>
                 <tbody id="openDayData">
                 </tbody>
             </table>
+
+            <div class="flex justify-between mt-4">
+                <button onclick="exportCalendarToCSV()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                    Scarica Calendario CSV
+                </button>
+            </div>
 
             <!-- Add Open Day Form -->
             <div class="mt-4 p-4 border rounded bg-gray-50">
@@ -95,10 +109,14 @@
             <!-- Schools will be populated here -->
         </div>
 
-        <!-- Save Button -->
-        <button onclick="saveData()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-            Salva Dati
-        </button>
+        <div class="flex justify-between mt-4">
+            <button onclick="saveData()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                Salva Dati
+            </button>
+            <button onclick="exportToCSV()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                Scarica Voti CSV
+            </button>
+        </div>
 
         <!-- Version Footer -->
         <div class="mt-8 pt-4 border-t text-gray-500 text-sm text-center">
@@ -106,7 +124,6 @@
             <p>17 Novembre 2024</p>
         </div>
     </div>
-
     <script>
         // Firebase configuration
         const firebaseConfig = {
@@ -175,6 +192,7 @@
                                         <th class="px-4 py-2 text-left">Mat</th>
                                         <th class="px-4 py-2 text-left">Inter.</th>
                                         <th class="px-4 py-2 text-left">Banco</th>
+                                        <th class="px-4 py-2 text-left">Sabato</th>
                                         <th class="px-4 py-2 text-left">Voto gen.</th>
                                         <th class="px-4 py-2 text-left">Impressione</th>
                                     </tr>
@@ -190,21 +208,23 @@
                                             <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-school="${school.id}" data-voter="${voter}" data-field="math"></td>
                                             <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-school="${school.id}" data-voter="${voter}" data-field="international"></td>
                                             <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-school="${school.id}" data-voter="${voter}" data-field="desk"></td>
+                                            <td class="px-4 py-2" contenteditable="true" data-school="${school.id}" data-voter="${voter}" data-field="saturday" data-type="saturday"></td>
                                             <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-school="${school.id}" data-voter="${voter}" data-field="generalVote"></td>
                                             <td class="px-4 py-2" contenteditable="true" data-school="${school.id}" data-voter="${voter}" data-field="impression"></td>
                                         </tr>
                                     `).join('')}
-                                    <!-- Average row -->
+                                    <!-- Average row (now editable) -->
                                     <tr class="${getVoterColor('Media')} border-t-2 border-gray-300">
                                         <td class="px-4 py-2 font-medium">Media</td>
-                                        <td class="px-4 py-2" data-average="true"></td>
-                                        <td class="px-4 py-2" data-average="true"></td>
-                                        <td class="px-4 py-2" data-average="true"></td>
-                                        <td class="px-4 py-2" data-average="true"></td>
-                                        <td class="px-4 py-2" data-average="true"></td>
-                                        <td class="px-4 py-2" data-average="true"></td>
-                                        <td class="px-4 py-2" data-average="true"></td>
-                                        <td class="px-4 py-2" data-average="true"></td>
+                                        <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-field="distance1"></td>
+                                        <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-field="distance2"></td>
+                                        <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-field="english"></td>
+                                        <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-field="science"></td>
+                                        <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-field="math"></td>
+                                        <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-field="international"></td>
+                                        <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-field="desk"></td>
+                                        <td class="px-4 py-2" contenteditable="true" data-field="saturday"></td>
+                                        <td class="px-4 py-2" contenteditable="true" data-type="numeric" data-field="generalVote"></td>
                                         <td class="px-4 py-2">-</td>
                                     </tr>
                                 </tbody>
@@ -223,51 +243,82 @@
                         alert('Inserire solo numeri interi');
                         this.textContent = '';
                     }
+                } else if (this.getAttribute('data-type') === 'saturday') {
+                    let value = this.textContent.trim().toUpperCase();
+                    if (value === 'SI') {
+                        this.textContent = 'SI 😢';
+                    } else if (value === 'NO') {
+                        this.textContent = 'NO ⛷️';
+                    }
                 }
-                updateAverages(this);
             });
         }
-
-        function calculateAverage(values) {
-            const validValues = values.map(v => parseInt(v.trim())).filter(n => !isNaN(n));
-            if (validValues.length === 0) return '-';
-            const sum = validValues.reduce((a, b) => a + b, 0);
-            return Math.round(sum / validValues.length);
-        }
-
-        function updateAverages(changedElement) {
-            const schoolId = changedElement.getAttribute('data-school');
-            if (!schoolId) return;
-
-            const schoolElement = document.getElementById(`school-${schoolId}`);
-            const averageRow = schoolElement.querySelector('tr:last-child');
-            const averageCells = averageRow.querySelectorAll('[data-average]');
+        // CSV Export Functions
+        function exportToCSV() {
+            let csvContent = 'Liceo,Votante,Dist. Mar.,Dist. Fil.,Inglese,Scienze,Mat,Inter.,Banco,Sabato,Voto gen.,Impressione\n';
             
-            const voterRows = Array.from(schoolElement.querySelectorAll('tr')).slice(0, voters.length);
-            averageCells.forEach((cell, index) => {
-                const values = voterRows.map(row => row.cells[index + 1].textContent);
-                cell.textContent = calculateAverage(values);
+            schools.forEach(school => {
+                const schoolElement = document.getElementById(`school-${school.id}`);
+                const rows = schoolElement.querySelectorAll('tbody tr');
+                
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    const rowData = [
+                        school.name,
+                        cells[0].textContent,
+                        cells[1].textContent,
+                        cells[2].textContent,
+                        cells[3].textContent,
+                        cells[4].textContent,
+                        cells[5].textContent,
+                        cells[6].textContent,
+                        cells[7].textContent,
+                        cells[8].textContent,
+                        cells[9].textContent,
+                        cells[10].textContent
+                    ].map(cell => `"${cell}"`).join(',');
+                    csvContent += rowData + '\n';
+                });
             });
+
+            downloadCSV(csvContent, 'valutazioni_scuole.csv');
         }
 
-        // Unified window.onload function
-        window.onload = function() {
-            // Initialize schools
-            const container = document.getElementById('schoolsContainer');
-            container.innerHTML = schools.map(createSchoolHTML).join('');
+        function exportCalendarToCSV() {
+            let csvContent = 'Liceo,Data,Orario,Prenotato,Link,Note\n';
             
-            // Initialize numeric validation and averages
-            document.querySelectorAll('[contenteditable="true"]').forEach(validateNumericInput);
+            const rows = document.querySelectorAll('#openDayData tr');
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const rowData = [
+                    cells[0].textContent,
+                    cells[1].textContent,
+                    cells[2].textContent,
+                    cells[3].querySelector('input').checked ? 'Si' : 'No',
+                    cells[4].querySelector('a')?.href || '',
+                    cells[5].textContent
+                ].map(cell => `"${cell}"`).join(',');
+                csvContent += rowData + '\n';
+            });
 
-            // Initialize school select for Open Days
-            initializeSchoolSelect();
-            
-            // Load data
-            loadDataFromFirebase();
-            loadOpenDays();
-        };
+            downloadCSV(csvContent, 'calendario_openday.csv');
+        }
 
-        // Open Days related functions
+        function downloadCSV(content, fileName) {
+            const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            if (navigator.msSaveBlob) {
+                navigator.msSaveBlob(blob, fileName);
+            } else {
+                link.href = window.URL.createObjectURL(blob);
+                link.setAttribute('download', fileName);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+
+        // Initialize school select for Open Days
         function initializeSchoolSelect() {
             const select = document.getElementById('schoolSelect');
             select.innerHTML = '<option value="">Seleziona Liceo</option>';
@@ -279,6 +330,7 @@
             });
         }
 
+        // Open Days Functions
         async function addOpenDay() {
             const schoolId = document.getElementById('schoolSelect').value;
             const date = document.getElementById('dateInput').value;
@@ -340,7 +392,10 @@
                         <td class="border px-4 py-2">
                             ${data.link ? `<a href="${data.link}" target="_blank" class="text-blue-600 hover:underline">Prenota</a>` : ''}
                         </td>
-                        <td class="border px-4 py-2">${data.note || ''}</td>
+                        <td class="border px-4 py-2" contenteditable="true" onblur="updateNote('${doc.id}', this.textContent.trim())">${data.note || ''}</td>
+                        <td class="border px-4 py-2">
+                            <span class="delete-row" onclick="deleteOpenDay('${doc.id}')">🗑️</span>
+                        </td>
                     `;
                     
                     tbody.appendChild(row);
@@ -350,11 +405,29 @@
             }
         }
 
+        async function deleteOpenDay(docId) {
+            if (confirm('Sei sicuro di voler eliminare questo Open Day?')) {
+                try {
+                    await db.collection('opendays').doc(docId).delete();
+                    loadOpenDays();
+                } catch (error) {
+                    console.error('Error deleting open day:', error);
+                    alert('Errore nella cancellazione dell\'open day');
+                }
+            }
+        }
+
+        async function updateNote(docId, note) {
+            try {
+                await db.collection('opendays').doc(docId).update({ note });
+            } catch (error) {
+                console.error('Error updating note:', error);
+            }
+        }
+
         async function updateBookingStatus(docId, booked) {
             try {
-                await db.collection('opendays').doc(docId).update({
-                    booked: booked
-                });
+                await db.collection('opendays').doc(docId).update({ booked });
             } catch (error) {
                 console.error('Error updating booking status:', error);
                 alert('Errore nell\'aggiornamento dello stato di prenotazione');
@@ -369,6 +442,7 @@
             document.getElementById('noteInput').value = '';
         }
 
+        // Save/Load Data Functions
         async function saveData() {
             try {
                 const batch = db.batch();
@@ -404,7 +478,6 @@
         async function loadDataFromFirebase() {
             try {
                 const snapshot = await db.collection('votes').get();
-                const promises = [];
                 
                 snapshot.forEach(doc => {
                     const data = doc.data();
@@ -415,18 +488,31 @@
                             );
                             if (cell) {
                                 cell.textContent = data[field];
-                                promises.push(updateAverages(cell));
                             }
                         }
                     });
                 });
-
-                await Promise.all(promises);
-            
-        } catch (error) {
+            } catch (error) {
                 console.error('Error loading data:', error);
             }
         }
+
+        // Initialize on page load
+        window.onload = function() {
+            // Initialize schools
+            const container = document.getElementById('schoolsContainer');
+            container.innerHTML = schools.map(createSchoolHTML).join('');
+            
+            // Initialize numeric validation
+            document.querySelectorAll('[contenteditable="true"]').forEach(validateNumericInput);
+
+            // Initialize school select for Open Days
+            initializeSchoolSelect();
+            
+            // Load data
+            loadDataFromFirebase();
+            loadOpenDays();
+        };
     </script>
 </body>
 </html>
