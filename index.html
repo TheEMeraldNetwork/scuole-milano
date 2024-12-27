@@ -86,17 +86,7 @@
             </div>
         </div>
 
-        <div class="bg-white shadow-md rounded p-6 mb-6">
-            <h2 class="text-xl font-semibold mb-4">Mappa Scuole Milano</h2>
-            <iframe
-                class="w-full h-96 border-2 border-gray-300 rounded"
-                frameborder="0"
-                src="https://www.google.com/maps/embed/v1/search?key=AIzaSyD-G2ym859_c3eQ62ocSYe3SPuvNb6HTf4&q=Leone+XIII+Milano|Einstein+Milano|Leonardo+Da+Vinci+Milano|Vittorini+Milano|Sacro+Cuore+Milano|Vittorio+Veneto+Milano">
-            </iframe>
-        </div>
-
-        <div id="schoolsContainer">
-        </div>
+        <div id="schoolsContainer"></div>
         
         <div class="flex justify-between mt-4">
             <button onclick="saveData()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
@@ -166,16 +156,22 @@
                             <span class="text-2xl font-bold">${school.id}. ${school.name}</span>
                             <div class="flex space-x-6">
                                 <div class="flex items-center">
-                                    <span class="font-medium mr-2">Dist. Mar.:</span>
-                                    <input type="number" class="editable-input w-20" 
+                                    <span class="font-medium mr-2">Distanza Marchetti (min):</span>
+                                    <input type="number" class="editable-input w-24" 
                                            data-school="${school.id}" data-field="distance_mar">
+                                    <span class="font-medium ml-4 mr-2">Mezzi:</span>
+                                    <input type="text" class="editable-input w-32" 
+                                           data-school="${school.id}" data-field="mezzi_mar">
                                 </div>
-                                <div class="flex items-center">
-                                    <span class="font-medium mr-2">Dist. Fil.:</span>
-                                    <input type="number" class="editable-input w-20" 
+                                <div class="flex items-center ml-4">
+                                    <span class="font-medium mr-2">Distanza Filippetti (min):</span>
+                                    <input type="number" class="editable-input w-24" 
                                            data-school="${school.id}" data-field="distance_fil">
+                                    <span class="font-medium ml-4 mr-2">Mezzi:</span>
+                                    <input type="text" class="editable-input w-32" 
+                                           data-school="${school.id}" data-field="mezzi_fil">
                                 </div>
-                                <div class="flex items-center">
+                                <div class="flex items-center ml-4">
                                     <span class="font-medium mr-2">Sabato:</span>
                                     <select class="editable-input" 
                                             data-school="${school.id}" data-field="saturday">
@@ -188,22 +184,18 @@
                         </div>
                     </div>
                     <div class="grid grid-cols-12 gap-4">
-                        <div class="col-span-3">
-                            <iframe class="w-full h-48 border rounded"
-                                    frameborder="0"
-                                    src="https://www.google.com/maps/embed/v1/place?key=AIzaSyD-G2ym859_c3eQ62ocSYe3SPuvNb6HTf4&q=${encodeURIComponent(school.address)}">
+                        <div class="col-span-12">
+                            <iframe
+                                class="w-full h-48 border rounded"
+                                frameborder="0"
+                                src="https://www.google.com/maps/embed/v1/directions?key=AIzaSyD-G2ym859_c3eQ62ocSYe3SPuvNb6HTf4&origin=Via+Leopoldo+Marchetti+2,+20141+Milano&destination=${encodeURIComponent(school.address)}&mode=transit">
                             </iframe>
                         </div>
-                        <div class="col-span-9">
+                        <div class="col-span-12">
                             <table class="w-full votes-table">
                                 <thead>
                                     <tr>
                                         <th>Votante</th>
-                                        <th>Inglese</th>
-                                        <th>Scienze</th>
-                                        <th>Mat</th>
-                                        <th>Inter.</th>
-                                        <th>Banco</th>
                                         <th>Voto gen.</th>
                                         <th>Impressione</th>
                                     </tr>
@@ -213,16 +205,6 @@
                                         <tr class="${getVoterColor(voter)}">
                                             <td class="font-medium">${voter}</td>
                                             <td contenteditable="true" data-type="numeric" 
-                                                data-school="${school.id}" data-voter="${voter}" data-field="english"></td>
-                                            <td contenteditable="true" data-type="numeric" 
-                                                data-school="${school.id}" data-voter="${voter}" data-field="science"></td>
-                                            <td contenteditable="true" data-type="numeric" 
-                                                data-school="${school.id}" data-voter="${voter}" data-field="math"></td>
-                                            <td contenteditable="true" data-type="numeric" 
-                                                data-school="${school.id}" data-voter="${voter}" data-field="international"></td>
-                                            <td contenteditable="true" data-type="numeric" 
-                                                data-school="${school.id}" data-voter="${voter}" data-field="desk"></td>
-                                            <td contenteditable="true" data-type="numeric" 
                                                 data-school="${school.id}" data-voter="${voter}" data-field="generalVote"></td>
                                             <td contenteditable="true" 
                                                 data-school="${school.id}" data-voter="${voter}" data-field="impression"></td>
@@ -230,11 +212,6 @@
                                     `).join('')}
                                     <tr class="voter-media border-t-2">
                                         <td class="font-medium">Media</td>
-                                        <td data-field="english">0.0</td>
-                                        <td data-field="science">0.0</td>
-                                        <td data-field="math">0.0</td>
-                                        <td data-field="international">0.0</td>
-                                        <td data-field="desk">0.0</td>
                                         <td data-field="generalVote">0.0</td>
                                         <td>-</td>
                                     </tr>
@@ -247,12 +224,14 @@
         }
 
         function exportToCSV() {
-            let csvContent = 'Liceo,Dist. Mar.,Dist. Fil.,Sabato,Votante,Inglese,Scienze,Mat,Inter.,Banco,Voto gen.,Impressione\n';            
+            let csvContent = 'Liceo,Dist. Mar.,Dist. Fil.,Mezzi Mar.,Mezzi Fil.,Sabato,Votante,Voto gen.,Impressione\n';
             schools.forEach(school => {
                 const schoolElement = document.getElementById(`school-${school.id}`);
                 const schoolInfo = {
                     distMar: schoolElement.querySelector('[data-field="distance_mar"]').value,
                     distFil: schoolElement.querySelector('[data-field="distance_fil"]').value,
+                    mezziMar: schoolElement.querySelector('[data-field="mezzi_mar"]').value,
+                    mezziFil: schoolElement.querySelector('[data-field="mezzi_fil"]').value,
                     saturday: schoolElement.querySelector('[data-field="saturday"]').value
                 };
                 
@@ -264,15 +243,12 @@
                             school.name,
                             schoolInfo.distMar,
                             schoolInfo.distFil,
+                            schoolInfo.mezziMar,
+                            schoolInfo.mezziFil,
                             schoolInfo.saturday,
                             cells[0].textContent,
                             cells[1].textContent,
-                            cells[2].textContent,
-                            cells[3].textContent,
-                            cells[4].textContent,
-                            cells[5].textContent,
-                            cells[6].textContent,
-                            cells[7].textContent
+                            cells[2].textContent
                         ].map(cell => `"${cell}"`).join(',');
                         csvContent += rowData + '\n';
                     }
@@ -306,10 +282,9 @@
                     }
                 }
                 
-                // Update averages when input changes
                 const tableBody = element.closest('tbody');
                 if (tableBody) {
-                    calculateAverages(tableBody, ['english', 'science', 'math', 'international', 'desk', 'generalVote']);
+                    calculateAverages(tableBody, ['generalVote']);
                 }
             });
         }
@@ -323,6 +298,8 @@
                     const schoolData = {
                         distance_mar: schoolElement.querySelector('[data-field="distance_mar"]').value,
                         distance_fil: schoolElement.querySelector('[data-field="distance_fil"]').value,
+                        mezzi_mar: schoolElement.querySelector('[data-field="mezzi_mar"]').value,
+                        mezzi_fil: schoolElement.querySelector('[data-field="mezzi_fil"]').value,
                         saturday: schoolElement.querySelector('[data-field="saturday"]').value
                     };
                     const schoolDocRef = db.collection('schools').doc(school.id.toString());
@@ -366,6 +343,8 @@
                     if (schoolElement) {
                         schoolElement.querySelector('[data-field="distance_mar"]').value = data.distance_mar || '';
                         schoolElement.querySelector('[data-field="distance_fil"]').value = data.distance_fil || '';
+                        schoolElement.querySelector('[data-field="mezzi_mar"]').value = data.mezzi_mar || '';
+                        schoolElement.querySelector('[data-field="mezzi_fil"]').value = data.mezzi_fil || '';
                         schoolElement.querySelector('[data-field="saturday"]').value = data.saturday || '';
                     }
                 });
@@ -382,7 +361,7 @@
                                 cell.textContent = data[field];
                                 const tableBody = cell.closest('tbody');
                                 if (tableBody) {
-                                    calculateAverages(tableBody, ['english', 'science', 'math', 'international', 'desk', 'generalVote']);
+                                    calculateAverages(tableBody, ['generalVote']);
                                 }
                             }
                         }
