@@ -20,7 +20,7 @@
         
         .votes-table {
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            background-color: grey;
+            background-color: white;
         }
         
         .votes-table th {
@@ -53,7 +53,7 @@
         }
     </style>
 </head>
-<body class="p-8">
+        <div id="schoolsContainer"></div>
         
         <div class="flex justify-between mt-4">
             <button onclick="saveData()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
@@ -63,6 +63,13 @@
                 Scarica Voti CSV
             </button>
         </div>
+        
+        <div class="mt-8 pt-4 border-t text-gray-500 text-sm text-center">
+            <p>##V_4##</p>
+            <p>17 Novembre 2024</p>
+        </div>
+    </div>
+
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCcPL8F_FAK8FYxDH3UW6xHSmUGQAxlO_Y",
