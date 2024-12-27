@@ -247,4 +247,160 @@
         }
 
         function exportToCSV() {
-            let csvContent =
+            let csvContent = 'Liceo,Dist. Mar.,Dist. Fil.,Sabato,Votante,Inglese,Scienze,Mat,Inter.,Banco,Voto gen.,Impressione\n';            
+            schools.forEach(school => {
+                const schoolElement = document.getElementById(`school-${school.id}`);
+                const schoolInfo = {
+                    distMar: schoolElement.querySelector('[data-field="distance_mar"]').value,
+                    distFil: schoolElement.querySelector('[data-field="distance_fil"]').value,
+                    saturday: schoolElement.querySelector('[data-field="saturday"]').value
+                };
+                
+                const rows = schoolElement.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    if (!row.classList.contains('voter-media')) {
+                        const cells = row.querySelectorAll('td');
+                        const rowData = [
+                            school.name,
+                            schoolInfo.distMar,
+                            schoolInfo.distFil,
+                            schoolInfo.saturday,
+                            cells[0].textContent,
+                            cells[1].textContent,
+                            cells[2].textContent,
+                            cells[3].textContent,
+                            cells[4].textContent,
+                            cells[5].textContent,
+                            cells[6].textContent,
+                            cells[7].textContent
+                        ].map(cell => `"${cell}"`).join(',');
+                        csvContent += rowData + '\n';
+                    }
+                });
+            });
+
+            downloadCSV(csvContent, 'valutazioni_scuole.csv');
+        }
+
+        function downloadCSV(content, fileName) {
+            const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            if (navigator.msSaveBlob) {
+                navigator.msSaveBlob(blob, fileName);
+            } else {
+                link.href = window.URL.createObjectURL(blob);
+                link.setAttribute('download', fileName);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+
+        function validateNumericInput(element) {
+            element.addEventListener('input', function(e) {
+                if (element.hasAttribute('data-type') && element.getAttribute('data-type') === 'numeric') {
+                    let value = this.textContent.trim();
+                    if (value && !/^\d*\.?\d*$/.test(value)) {
+                        alert('Please enter only numbers');
+                        this.textContent = '';
+                    }
+                }
+                
+                // Update averages when input changes
+                const tableBody = element.closest('tbody');
+                if (tableBody) {
+                    calculateAverages(tableBody, ['english', 'science', 'math', 'international', 'desk', 'generalVote']);
+                }
+            });
+        }
+
+        async function saveData() {
+            try {
+                const batch = db.batch();
+
+                schools.forEach(school => {
+                    const schoolElement = document.getElementById(`school-${school.id}`);
+                    const schoolData = {
+                        distance_mar: schoolElement.querySelector('[data-field="distance_mar"]').value,
+                        distance_fil: schoolElement.querySelector('[data-field="distance_fil"]').value,
+                        saturday: schoolElement.querySelector('[data-field="saturday"]').value
+                    };
+                    const schoolDocRef = db.collection('schools').doc(school.id.toString());
+                    batch.set(schoolDocRef, schoolData);
+                });
+
+                const votes = [];
+                document.querySelectorAll('[data-school][data-voter]').forEach(cell => {
+                    const schoolId = cell.getAttribute('data-school');
+                    const voter = cell.getAttribute('data-voter');
+                    const field = cell.getAttribute('data-field');
+                    const value = cell.textContent.trim();
+                    
+                    let vote = votes.find(v => v.schoolId === schoolId && v.voter === voter);
+                    if (!vote) {
+                        vote = { schoolId, voter, docId: `${schoolId}-${voter}` };
+                        votes.push(vote);
+                    }
+                    vote[field] = value;
+                });
+
+                votes.forEach(vote => {
+                    const docRef = db.collection('votes').doc(vote.docId);
+                    batch.set(docRef, vote);
+                });
+
+                await batch.commit();
+                alert('Data saved successfully!');
+            } catch (error) {
+                console.error('Error saving data:', error);
+                alert('Error saving data: ' + error.message);
+            }
+        }
+
+        async function loadDataFromFirebase() {
+            try {
+                const schoolsSnapshot = await db.collection('schools').get();
+                schoolsSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    const schoolElement = document.getElementById(`school-${doc.id}`);
+                    if (schoolElement) {
+                        schoolElement.querySelector('[data-field="distance_mar"]').value = data.distance_mar || '';
+                        schoolElement.querySelector('[data-field="distance_fil"]').value = data.distance_fil || '';
+                        schoolElement.querySelector('[data-field="saturday"]').value = data.saturday || '';
+                    }
+                });
+
+                const votesSnapshot = await db.collection('votes').get();
+                votesSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    Object.keys(data).forEach(field => {
+                        if (field !== 'schoolId' && field !== 'voter' && field !== 'docId') {
+                            const cell = document.querySelector(
+                                `[data-school="${data.schoolId}"][data-voter="${data.voter}"][data-field="${field}"]`
+                            );
+                            if (cell) {
+                                cell.textContent = data[field];
+                                const tableBody = cell.closest('tbody');
+                                if (tableBody) {
+                                    calculateAverages(tableBody, ['english', 'science', 'math', 'international', 'desk', 'generalVote']);
+                                }
+                            }
+                        }
+                    });
+                });
+            } catch (error) {
+                console.error('Error loading data:', error);
+            }
+        }
+
+        window.onload = function() {
+            const container = document.getElementById('schoolsContainer');
+            container.innerHTML = schools.map(createSchoolHTML).join('');
+            
+            document.querySelectorAll('[data-type="numeric"]').forEach(validateNumericInput);
+            
+            loadDataFromFirebase();
+        };
+    </script>
+</body>
+</html>
